@@ -113,24 +113,6 @@ book-translator/
 - translated_text: Translated chunk text
 - status: Chunk status
 
-## Features in Detail
-
-### Translation Process
-1. File upload and validation
-2. Text chunking for efficient processing
-3. Language detection (if auto-detect is selected)
-4. Chunk-by-chunk translation with progress tracking
-5. Real-time progress updates via Server-Sent Events
-6. Automatic translation resumption on interruption
-
-### UI Features
-- Drag-and-drop file upload
-- Real-time progress bar
-- Side-by-side original and translated text preview
-- Translation history with filtering and sorting
-- Dark/light mode support
-- Responsive design for mobile and desktop
-
 ## Contributing
 
 1. Fork the repository
