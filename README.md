@@ -30,13 +30,13 @@ A web-based application for translating books and text documents between multipl
 - Download translated files
 - Modern, responsive UI built with React and Tailwind CSS
 
-![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
-
 ## Prerequisites
 
 - Python 3.7+
 - [Ollama](https://ollama.ai/) installed and running
 - Node.js (optional, for development)
+
+![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
 
 ## Installation
 
