@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Translator</title>
+    
+    <!-- React -->
+    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        #root {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const API_URL = 'http://127.0.0.1:5001';  // Changed to explicit localhost URL
+
+        const Card = ({ children, className = "" }) => (
+            <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>{children}</div>
+        );
+
+        const Button = ({ children, onClick, disabled, className = "" }) => (
+            <button
+                onClick={onClick}
+                disabled={disabled}
+                className={`px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 disabled:opacity-50 ${className}`}
+            >
+                {children}
+            </button>
+        );
+
+        const Select = ({ value, onChange, options, placeholder }) => (
+            <select
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+                className="w-full p-2 border rounded-md"
+            >
+                <option value="">{placeholder}</option>
+                {options.map(opt => (
+                    <option key={opt.code} value={opt.code}>{opt.name}</option>
+                ))}
+            </select>
+        );
+
+        function getLanguageName(languages, code) {
+            const lang = languages.find(l => l.code === code);
+            return lang ? lang.name : code;
+        }
+
+        function BookTranslatorUI() {
+            const [sourceLanguage, setSourceLanguage] = React.useState('');
+            const [targetLanguage, setTargetLanguage] = React.useState('');
+            const [selectedModel, setSelectedModel] = React.useState('');
+            const [inputFile, setInputFile] = React.useState(null);
+            const [isTranslating, setIsTranslating] = React.useState(false);
+            const [progress, setProgress] = React.useState(0);
+            const [models, setModels] = React.useState([]);
+            const [originalText, setOriginalText] = React.useState('');
+            const [translatedText, setTranslatedText] = React.useState('');
+            const [translations, setTranslations] = React.useState([]);
+            const [activeTab, setActiveTab] = React.useState('new');
+            const [detectedLanguage, setDetectedLanguage] = React.useState(null);
+            const [error, setError] = React.useState(null);
+
+            const languages = [
+                { code: 'auto', name: 'Auto Detect' },
+                { code: 'ru', name: 'Russian' },
+                { code: 'en', name: 'English' },
+                { code: 'de', name: 'German' },
+                { code: 'fr', name: 'French' },
+                { code: 'es', name: 'Spanish' },
+                { code: 'it', name: 'Italian' },
+                { code: 'zh', name: 'Chinese' },
+                { code: 'ja', name: 'Japanese' }
+            ];
+
+            React.useEffect(() => {
+                fetchModels();
+                fetchTranslations();
+            }, []);
+
+            const fetchModels = async () => {
+                try {
+                    setError(null);
+                    const response = await fetch(`${API_URL}/models`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    if (data.models) {
+                        setModels(data.models);
+                    }
+                } catch (error) {
+                    console.error('Error fetching models:', error);
+                    setError('Failed to load models. Please check if the server is running.');
+                }
+            };
+
+            const fetchTranslations = async () => {
+                try {
+                    setError(null);
+                    const response = await fetch(`${API_URL}/translations`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const data = await response.json();
+                    if (data.translations) {
+                        setTranslations(data.translations);
+                    }
+                } catch (error) {
+                    console.error('Error fetching translations:', error);
+                    setError('Failed to load translations. Please check if the server is running.');
+                }
+            };
+
+            const handleFileChange = (event) => {
+                const file = event.target.files[0];
+                if (file) {
+                    setInputFile(file);
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        setOriginalText(e.target.result);
+                    };
+                    reader.readAsText(file);
+                }
+            };
+
+            const handleTranslate = async () => {
+                if (!sourceLanguage || !targetLanguage || !selectedModel || !inputFile) {
+                    alert('Please select both languages, a model, and upload a file');
+                    return;
+                }
+
+                setIsTranslating(true);
+                setProgress(0);
+                setDetectedLanguage(null);
+                setError(null);
+
+                const formData = new FormData();
+                formData.append('file', inputFile);
+                formData.append('sourceLanguage', sourceLanguage);
+                formData.append('targetLanguage', targetLanguage);
+                formData.append('model', selectedModel);
+
+                try {
+                    const response = await fetch(`${API_URL}/translate`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+
+                        const chunk = decoder.decode(value);
+                        const lines = chunk.split('\n');
+
+                        for (const line of lines) {
+                            if (line.startsWith('data: ')) {
+                                try {
+                                    const data = JSON.parse(line.slice(5));
+                                    if (data.error) {
+                                        setError(`Translation error: ${data.error}`);
+                                        setIsTranslating(false);
+                                        break;
+                                    }
+                                    if (data.progress) {
+                                        setProgress(data.progress);
+                                    }
+                                    if (data.translated_text) {
+                                        setTranslatedText(data.translated_text);
+                                    }
+                                    if (data.detected_language) {
+                                        setDetectedLanguage(data.detected_language);
+                                    }
+                                } catch (e) {
+                                    console.error('Error parsing SSE data:', e);
+                                }
+                            }
+                        }
+                    }
+                } catch (error) {
+                    console.error('Translation error:', error);
+                    setError('Translation failed. Please try again.');
+                } finally {
+                    setIsTranslating(false);
+                    fetchTranslations();
+                }
+            };
+
+            const handleDownload = async (translationId) => {
+                try {
+                    window.open(`${API_URL}/download/${translationId}`, '_blank');
+                } catch (error) {
+                    console.error('Download error:', error);
+                    setError('Failed to download translation');
+                }
+            };
+
+            const handleContinueTranslation = async (translationId) => {
+                try {
+                    const response = await fetch(`${API_URL}/translations/${translationId}`, {
+                        method: 'GET',
+                        headers: {
+                            'Accept': 'application/json',
+                            'Content-Type': 'application/json'
+                        }
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error(`HTTP error! status: ${response.status}`);
+                    }
+                    
+                    const translation = await response.json();
+                    
+                    setSourceLanguage(translation.source_lang);
+                    setTargetLanguage(translation.target_lang);
+                    setSelectedModel(translation.model);
+                    setProgress(translation.progress);
+                    setOriginalText(translation.original_text);
+                    setTranslatedText(translation.translated_text);
+                    if (translation.detected_language) {
+                        setDetectedLanguage(translation.detected_language);
+                    }
+                    
+                    setActiveTab('new');
+                } catch (error) {
+                    console.error('Error loading translation:', error);
+                    setError('Failed to load translation');
+                }
+            };
+
+            const getDetectedLanguageText = () => {
+                if (detectedLanguage) {
+                    const langName = getLanguageName(languages, detectedLanguage);
+                    return `Detected: ${langName}`;
+                }
+                return '';
+            };
+
+            const getTranslationDirection = (translation) => {
+                if (translation.source_lang === 'auto' && translation.detected_language) {
+                    const detectedName = getLanguageName(languages, translation.detected_language);
+                    const targetName = getLanguageName(languages, translation.target_lang);
+                    return `Auto(${detectedName}) → ${targetName}`;
+                }
+                const sourceName = getLanguageName(languages, translation.source_lang);
+                const targetName = getLanguageName(languages, translation.target_lang);
+                return `${sourceName} → ${targetName}`;
+            };
+
+            return (
+                <Card className="w-full max-w-4xl mx-auto">
+                    <div className="mb-6">
+                        <h1 className="text-2xl font-bold">Book Translator</h1>
+                    </div>
+
+                    {error && (
+                        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4">
+                            {error}
+                        </div>
+                    )}
+
+                    <div className="flex mb-4 border-b">
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'new' ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab('new')}
+                        >
+                            New Translation
+                        </button>
+                        <button 
+                            className={`px-4 py-2 ${activeTab === 'history' ? 'border-b-2 border-blue-500' : ''}`}
+                            onClick={() => setActiveTab('history')}
+                        >
+                            Translation History
+                        </button>
+                    </div>
+
+                    {activeTab === 'new' ? (
+                        <div className="space-y-6">
+                            <div className="grid grid-cols-3 gap-4">
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Source Language</label>
+                                    <Select 
+                                        value={sourceLanguage}
+                                        onChange={setSourceLanguage}
+                                        options={languages}
+                                        placeholder="Select source language"
+                                    />
+                                    {detectedLanguage && sourceLanguage === 'auto' && (
+                                        <p className="text-sm text-gray-500 mt-1">
+                                            {getDetectedLanguageText()}
+                                        </p>
+                                    )}
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Target Language</label>
+                                    <Select
+                                        value={targetLanguage}
+                                        onChange={setTargetLanguage}
+                                        options={languages.filter(lang => lang.code !== 'auto')}
+                                        placeholder="Select target language"
+                                    />
+                                </div>
+
+                                <div>
+                                    <label className="block text-sm font-medium mb-2">Select Model</label>
+                                    <Select
+                                        value={selectedModel}
+                                        onChange={setSelectedModel}
+                                        options={models.map(m => ({ code: m.name, name: m.name }))}
+                                        placeholder="Select AI model"
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-sm font-medium mb-2">Upload File</label>
+                                <div className="flex items-center justify-center w-full">
+                                    <label className="flex flex-col items-center justify-center w-full h-32 border-2 border-dashed rounded-lg cursor-pointer bg-gray-50 hover:bg-gray-100">
+                                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
+                                            <svg className="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
+                                            </svg>
+                                            <p className="mb-2 text-sm text-gray-500">
+                                                <span className="font-semibold">Click to upload</span> or drag and drop
+                                            </p>
+                                            <p className="text-xs text-gray-500">TXT files only</p>
+                                        </div>
+                                        <input
+                                            type="file"
+                                            className="hidden"
+                                            accept=".txt"
+                                            onChange={handleFileChange}
+                                        />
+                                    </label>
+                                </div>
+                                {inputFile && (
+                                    <p className="text-sm text-gray-500 mt-2">Selected file: {inputFile.name}</p>
+                                )}
+                            </div>
+
+                            {isTranslating ? (
+                                <div>
+                                <div className="w-full bg-gray-200 rounded-full h-2">
+                                <div
+                                className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                                style={{ width: `${progress}%` }}
+                                ></div>
+                                </div>
+                                <p className="text-sm text-center text-gray-600 mt-2">
+                                Translation Progress: {progress.toFixed(1)}%
+                                </p>
+                                </div>
+                            ) : (
+                                <Button
+                                onClick={handleTranslate}
+                                disabled={!sourceLanguage || !targetLanguage || !selectedModel || !inputFile}
+                                className="w-full"
+                                >
+                                Start Translation
+                                </Button>
+                            )}
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                        <div>
+                        <h3 className="font-medium mb-2">Original Text</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg h-96 overflow-auto">
+                        <pre className="whitespace-pre-wrap font-mono text-sm">
+                        {originalText}
+                        </pre>
+                        </div>
+                        </div>
+                        <div>
+                        <h3 className="font-medium mb-2">Translated Text</h3>
+                        <div className="bg-gray-50 p-4 rounded-lg h-96 overflow-auto">
+                        <pre className="whitespace-pre-wrap font-mono text-sm">
+                        {translatedText}
+                        </pre>
+                        </div>
+                        </div>
+                        </div>
+                        </div>
+                    ) : (
+                        <div className="space-y-4">
+                        <div className="flex justify-end">
+                        <Button onClick={fetchTranslations} className="flex items-center gap-2">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                        </svg>
+                        Refresh
+                        </Button>
+                        </div>
+                        
+                        <div className="overflow-x-auto">
+                        <table className="min-w-full divide-y divide-gray-200">
+                        <thead className="bg-gray-50">
+                        <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">File</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Languages</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+                        </tr>
+                        </thead>
+                        <tbody className="bg-white divide-y divide-gray-200">
+                        {translations.map((translation) => (
+                            <tr key={translation.id}>
+                            <td className="px-6 py-4 whitespace-nowrap">{translation.filename}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                            {getTranslationDirection(translation)}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">{translation.model}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{translation.status}</td>
+                            <td className="px-6 py-4 whitespace-nowrap">{translation.progress.toFixed(1)}%</td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                            {new Date(translation.updated_at).toLocaleString()}
+                            </td>
+                            <td className="px-6 py-4 whitespace-nowrap">
+                            <div className="flex space-x-2">
+                            {translation.status === 'completed' && (
+                                <Button onClick={() => handleDownload(translation.id)} className="p-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                                </svg>
+                                </Button>
+                            )}
+                            {translation.status === 'in_progress' && (
+                                <Button onClick={() => handleContinueTranslation(translation.id)} className="p-2">
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
+                                </svg>
+                                </Button>
+                            )}
+                            </div>
+                            </td>
+                            </tr>
+                        ))}
+                        </tbody>
+                        </table>
+                        </div>
+                        </div>
+                    )}
+                </Card>
+            );
+        }
+        
+        ReactDOM.render(
+            <BookTranslatorUI />,
+            document.getElementById('root')
+        );
+    </script>
+</body>
+</html>
