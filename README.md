@@ -87,40 +87,6 @@ book-translator/
 - `GET /download/<id>` - Download completed translation
 - `GET /health` - Check service health
 
-## Database Schema
-
-### Translations Table
-- id: Primary key
-- filename: Original file name
-- source_lang: Source language code
-- target_lang: Target language code
-- model: AI model used
-- status: Translation status
-- progress: Translation progress (0-100)
-- current_chunk: Current chunk being processed
-- total_chunks: Total number of chunks
-- original_text: Source text
-- translated_text: Translated text
-- detected_language: Detected language (for auto detection)
-- created_at: Creation timestamp
-- updated_at: Last update timestamp
-
-### Chunks Table
-- id: Primary key
-- translation_id: Foreign key to translations
-- chunk_number: Chunk sequence number
-- original_text: Original chunk text
-- translated_text: Translated chunk text
-- status: Chunk status
-
-## Contributing
-
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
 ## License
 
 This project is licensed under the MIT License - see the LICENSE file for details
