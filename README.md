@@ -1,3 +1,5 @@
+![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/banner.jpg)
+
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1280 320">
   <defs>
     <linearGradient id="modernGrad" x1="0%" y1="0%" x2="100%" y2="100%">
