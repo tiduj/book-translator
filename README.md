@@ -1,7 +1,6 @@
 ![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/banner.jpg)
 
 # Book Translator
-
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Flask](https://img.shields.io/badge/flask-%23000.svg?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
@@ -13,6 +12,7 @@ A web-based application for translating books and text documents between multipl
 
 ## Features
 
+### Core Features
 - Translate text documents between multiple languages:
   - English
   - Russian
@@ -30,13 +30,20 @@ A web-based application for translating books and text documents between multipl
 - Download translated files
 - Modern, responsive UI built with React and Tailwind CSS
 
-## Prerequisites
+### Advanced Features
+- Translation caching system
+- Automatic error recovery
+- Rate limiting and retry logic
+- Chunked translation processing
+- Real-time metrics monitoring
+- Health check system
+- Comprehensive logging system
+- Automatic cleanup of old translations
 
+## Prerequisites
 - Python 3.7+
 - [Ollama](https://ollama.ai/) installed and running
 - Node.js (optional, for development)
-
-![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
 
 ## Installation
 
@@ -67,7 +74,6 @@ python translator.py
 Open `http://localhost:5001` in your web browser
 
 ## Project Structure
-
 ```
 book-translator/
 ├── translator.py        # Flask backend
@@ -75,25 +81,65 @@ book-translator/
 │   └── index.html      # React frontend
 ├── uploads/            # Temporary upload directory
 ├── translations/       # Completed translations directory
-└── translations.db     # SQLite database
+├── logs/              # Application logs directory
+│   ├── app.log        # Main application logs
+│   ├── translations.log # Translation-specific logs
+│   └── api.log        # API request logs
+├── translations.db     # Main SQLite database
+└── cache.db           # Translation cache database
 ```
 
 ## API Endpoints
 
-- `GET /models` - Get available Ollama models
+### Translation Operations
+- `POST /translate` - Start new translation
 - `GET /translations` - Get translation history
 - `GET /translations/<id>` - Get specific translation details
-- `POST /translate` - Start new translation
 - `GET /download/<id>` - Download completed translation
+- `POST /retry-translation/<id>` - Retry failed translation
+
+### System Operations
+- `GET /models` - Get available Ollama models
+- `GET /metrics` - Get system metrics and statistics
 - `GET /health` - Check service health
+- `GET /failed-translations` - Get list of failed translations
+
+## Monitoring and Metrics
+
+The application provides real-time monitoring of:
+- Translation success rate
+- Average translation time
+- CPU usage
+- Memory usage
+- Disk usage
+- System uptime
+- Translation queue status
+
+## Error Handling and Recovery
+
+- Automatic retry system for failed translations
+- Configurable retry attempts and backoff
+- Detailed error logging and tracking
+- Translation state preservation
+- Automatic cleanup of failed translations after 7 days
+
+## Caching System
+
+- Translation results are cached for improved performance
+- Configurable cache retention period (default 30 days)
+- Automatic cache cleanup
+- Cache hit/miss tracking
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
+4. Push to the branch (`git push origin feature/AmazingFeature`)
+5. Open a Pull Request
 
 ## License
 
-This project is licensed under the MIT License - see the LICENSE file for details
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## Acknowledgments
-
-- [Ollama](https://ollama.ai/) for providing the AI models
-- [Flask](https://flask.palletsprojects.com/) for the backend framework
-- [React](https://reactjs.org/) for the frontend framework
-- [Tailwind CSS](https://tailwindcss.com/) for styling
+![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
