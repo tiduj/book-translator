@@ -1,6 +1,5 @@
 ![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/banner.jpg)
 
-# Book Translator
 [![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Flask](https://img.shields.io/badge/flask-%23000.svg?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
@@ -8,7 +7,7 @@
 [![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
 [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
 
-A web-based application for translating books and text documents between multiple languages using Ollama AI models. Built with Python (Flask) backend and React frontend.
+A web-based application for translating books and large text documents between multiple languages using Ollama AI models. Built with Python (Flask) backend and React frontend.
 
 ## Features
 
