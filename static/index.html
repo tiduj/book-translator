@@ -14,7 +14,30 @@
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     
     <style>
-        /* Your existing styles */
+        .error-shake {
+            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        }
+        
+        @keyframes shake {
+            10%, 90% { transform: translate3d(-1px, 0, 0); }
+            20%, 80% { transform: translate3d(2px, 0, 0); }
+            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
+            40%, 60% { transform: translate3d(4px, 0, 0); }
+        }
+        
+        .loading-indicator {
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -267,478 +290,482 @@
             const [activeTab, setActiveTab] = React.useState('new');
             const [detectedLanguage, setDetectedLanguage] = React.useState(null);
             const [error, setError] = React.useState(null);
-            const [metrics, setMetrics] = React.useState(null); // Corrected Line
+            const [metrics, setMetrics] = React.useState(null);
             const [formErrors, setFormErrors] = React.useState({});
             
             // Constants
             const languages = [
-              { code: 'auto', name: 'Auto Detect' },
-              { code: 'ru', name: 'Russian' },
-              { code: 'en', name: 'English' },
-              { code: 'de', name: 'German' },
-              { code: 'fr', name: 'French' },
-              { code: 'es', name: 'Spanish' },
-              { code: 'it', name: 'Italian' },
-              { code: 'zh', name: 'Chinese' },
-              { code: 'ja', name: 'Japanese' }
+                { code: 'auto', name: 'Auto Detect' },
+                { code: 'ru', name: 'Russian' },
+                { code: 'en', name: 'English' },
+                { code: 'de', name: 'German' },
+                { code: 'fr', name: 'French' },
+                { code: 'es', name: 'Spanish' },
+                { code: 'it', name: 'Italian' },
+                { code: 'zh', name: 'Chinese' },
+                { code: 'ja', name: 'Japanese' }
             ];
             
-            // Effects
-            React.useEffect(() => {
-              fetchModels();
+          // Effects// Effects
+          React.useEffect(() => {
+            fetchModels();
+            fetchTranslations();
+            fetchMetrics();
+          }, []);
+          
+          useInterval(() => {
+            if (activeTab === 'history') {
               fetchTranslations();
-              fetchMetrics();
-            }, []);
-            
-            useInterval(() => {
-              if (activeTab === 'history') {
-                fetchTranslations();
+            }
+            fetchMetrics();
+          }, 30000);
+          
+          // API calls
+          const fetchModels = async () => {
+            try {
+              setError(null);
+              const response = await fetch(`${API_URL}/models`);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
               }
-              fetchMetrics();
-            }, 30000); // Update every 30 seconds
-            
-            // API calls
-            const fetchModels = async () => {
-              try {
-                setError(null);
-                const response = await fetch(`${API_URL}/models`);
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
+              
+              const data = await response.json();
+              if (data.models) {
+                setModels(data.models);
+              }
+            } catch (error) {
+              console.error('Error fetching models:', error);
+              setError('Failed to load models. Please check if the server is running.');
+            }
+          };
+          
+          const fetchTranslations = async () => {
+            try {
+              setError(null);
+              const response = await fetch(`${API_URL}/translations`);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+              
+              const data = await response.json();
+              if (data.translations) {
+                setTranslations(data.translations);
+              }
+            } catch (error) {
+              console.error('Error fetching translations:', error);
+              setError('Failed to load translations. Please check if the server is running.');
+            }
+          };
+          
+          const fetchMetrics = async () => {
+            try {
+              const response = await fetch(`${API_URL}/metrics`);
+              if (response.ok) {
                 const data = await response.json();
-                if (data.models) {
-                  setModels(data.models);
-                }
-              } catch (error) {
-                console.error('Error fetching models:', error);
-                setError('Failed to load models. Please check if the server is running.');
+                setMetrics(data);
               }
-            };
-            
-            const fetchTranslations = async () => {
-              try {
-                setError(null);
-                const response = await fetch(`${API_URL}/translations`);
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const data = await response.json();
-                if (data.translations) {
-                  setTranslations(data.translations);
-                }
-              } catch (error) {
-                console.error('Error fetching translations:', error);
-                setError('Failed to load translations. Please check if the server is running.');
-              }
-            };
-            
-            const fetchMetrics = async () => {
-              try {
-                const response = await fetch(`${API_URL}/metrics`);
-                if (response.ok) {
-                  const data = await response.json();
-                  setMetrics(data);
-                }
-              } catch (error) {
-                console.error('Error fetching metrics:', error);
-              }
-            };
-            
-            // Event handlers
-            const handleFileChange = (event) => {
-              const file = event.target.files[0];
-              if (file) {
-                if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                  setError('File size exceeds 10MB limit');
-                  return;
-                }
-                
-                setInputFile(file);
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                  setOriginalText(e.target.result);
-                };
-                reader.onerror = () => {
-                  setError('Failed to read file');
-                };
-                reader.readAsText(file);
-              }
-            };
-            
-            const validateForm = () => {
-              const errors = {};
-              
-              if (!sourceLanguage) {
-                errors.sourceLanguage = 'Source language is required';
-              }
-              
-              if (!targetLanguage) {
-                errors.targetLanguage = 'Target language is required';
-              }
-              
-              if (!selectedModel) {
-                errors.model = 'Model selection is required';
-              }
-              
-              if (!inputFile) {
-                errors.file = 'Please select a file';
-              }
-              
-              setFormErrors(errors);
-              return Object.keys(errors).length === 0;
-            };
-            
-            const handleTranslate = async () => {
-              if (!validateForm()) {
+            } catch (error) {
+              console.error('Error fetching metrics:', error);
+            }
+          };
+          
+          // Event handlers
+          const handleFileChange = (event) => {
+            const file = event.target.files[0];
+            if (file) {
+              if (file.size > 10 * 1024 * 1024) { // 10MB limit
+                setFormErrors({...formErrors, file: 'File size exceeds 10MB limit'});
                 return;
               }
               
-              setIsTranslating(true);
-              setProgress(0);
-              setDetectedLanguage(null);
-              setError(null);
+              setInputFile(file);
+              const reader = new FileReader();
+              reader.onload = (e) => {
+                setOriginalText(e.target.result);
+              };
+              reader.onerror = () => {
+                setFormErrors({...formErrors, file: 'Failed to read file'});
+              };
+              reader.readAsText(file);
+            }
+          };
+          
+          const validateForm = () => {
+            const errors = {};
+            
+            if (!sourceLanguage) {
+              errors.sourceLanguage = 'Source language is required';
+            }
+            
+            if (!targetLanguage) {
+              errors.targetLanguage = 'Target language is required';
+            }
+            
+            if (!selectedModel) {
+              errors.model = 'Model selection is required';
+            }
+            
+            if (!inputFile) {
+              errors.file = 'Please select a file';
+            }
+            
+            setFormErrors(errors);
+            return Object.keys(errors).length === 0;
+          };
+          
+          const handleTranslate = async () => {
+            if (!validateForm()) {
+              return;
+            }
+            
+            setIsTranslating(true);
+            setProgress(0);
+            setDetectedLanguage(null);
+            setError(null);
+            
+            const formData = new FormData();
+            formData.append('file', inputFile);
+            formData.append('sourceLanguage', sourceLanguage);
+            formData.append('targetLanguage', targetLanguage);
+            formData.append('model', selectedModel);
+            
+            try {
+              const response = await fetch(`${API_URL}/translate`, {
+                method: 'POST',
+                body: formData
+              });
               
-              const formData = new FormData();
-              formData.append('file', inputFile);
-              formData.append('sourceLanguage', sourceLanguage);
-              formData.append('targetLanguage', targetLanguage);
-              formData.append('model', selectedModel);
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
               
-              try {
-                const response = await fetch(`${API_URL}/translate`, {
-                  method: 'POST',
-                  body: formData
-                });
+              const reader = response.body.getReader();
+              const decoder = new TextDecoder();
+              let buffer = '';
+              
+              while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
                 
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
                 
-                const reader = response.body.getReader();
-                const decoder = new TextDecoder();
+                buffer = lines.pop() || '';
                 
-                while (true) {
-                  const { done, value } = await reader.read();
-                  if (done) break;
-                  
-                  const chunk = decoder.decode(value);
-                  const lines = chunk.split('\n');
-                  
-                  for (const line of lines) {
-                    if (line.startsWith('data: ')) {
-                      try {
-                        const data = JSON.parse(line.slice(5));
-                        if (data.error) {
-                          setError(`Translation error: ${data.error}`);
-                          setIsTranslating(false);
-                          break;
-                        }
-                        if (data.progress) {
-                          setProgress(data.progress);
-                        }
-                        if (data.translated_text) {
-                          setTranslatedText(data.translated_text);
-                        }
-                        if (data.detected_language) {
-                          setDetectedLanguage(data.detected_language);
-                        }
-                      } catch (e) {
-                        console.error('Error parsing SSE data:', e);
+                for (const line of lines) {
+                  if (line.trim() && line.startsWith('data: ')) {
+                    try {
+                      const data = JSON.parse(line.slice(6).trim());
+                      if (data.error) {
+                        setError(`Translation error: ${data.error}`);
+                        setIsTranslating(false);
+                        return;
                       }
+                      if (data.progress !== undefined) {
+                        setProgress(data.progress);
+                      }
+                      if (data.translated_text) {
+                        setTranslatedText(data.translated_text);
+                      }
+                      if (data.detected_language) {
+                        setDetectedLanguage(data.detected_language);
+                      }
+                    } catch (e) {
+                      console.error('Error parsing SSE data:', e);
+                      console.debug('Problematic line:', line);
                     }
                   }
                 }
-              } catch (error) {
-                console.error('Translation error:', error);
-                setError('Translation failed. Please try again.');
-              } finally {
-                setIsTranslating(false);
-                fetchTranslations();
               }
-            };
-            
-            const handleDownload = async (translationId) => {
-              try {
-                window.open(`${API_URL}/download/${translationId}`, '_blank');
-              } catch (error) {
-                console.error('Download error:', error);
-                setError('Failed to download translation');
+            } catch (error) {
+              console.error('Translation error:', error);
+              setError('Translation failed. Please try again.');
+            } finally {
+              setIsTranslating(false);
+              fetchTranslations();
+            }
+          };
+          
+          const handleDownload = async (translationId) => {
+            try {
+              window.open(`${API_URL}/download/${translationId}`, '_blank');
+            } catch (error) {
+              console.error('Download error:', error);
+              setError('Failed to download translation');
+            }
+          };
+          
+          const handleRetryTranslation = async (translationId) => {
+            try {
+              const response = await fetch(`${API_URL}/retry-translation/${translationId}`, {
+                method: 'POST'
+              });
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
               }
-            };
-            
-            const handleRetryTranslation = async (translationId) => {
-              try {
-                const response = await fetch(`${API_URL}/retry-translation/${translationId}`, {
-                  method: 'POST'
-                });
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                await fetchTranslations();
-              } catch (error) {
-                console.error('Retry error:', error);
-                setError('Failed to retry translation');
+              
+              await fetchTranslations();
+            } catch (error) {
+              console.error('Retry error:', error);
+              setError('Failed to retry translation');
+            }
+          };
+          
+          const handleContinueTranslation = async (translationId) => {
+            try {
+              const response = await fetch(`${API_URL}/translations/${translationId}`);
+              
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
               }
-            };
-            
-            const handleContinueTranslation = async (translationId) => {
-              try {
-                const response = await fetch(`${API_URL}/translations/${translationId}`);
-                
-                if (!response.ok) {
-                  throw new Error(`HTTP error! status: ${response.status}`);
-                }
-                
-                const translation = await response.json();
-                
-                setSourceLanguage(translation.source_lang);
-                setTargetLanguage(translation.target_lang);
-                setSelectedModel(translation.model);
-                setProgress(translation.progress);
-                setOriginalText(translation.original_text);
-                setTranslatedText(translation.translated_text);
-                if (translation.detected_language) {
-                  setDetectedLanguage(translation.detected_language);
-                }
-                
-                setActiveTab('new');
-              } catch (error) {
-                console.error('Error loading translation:', error);
-                setError('Failed to load translation');
+              
+              const translation = await response.json();
+              
+              setSourceLanguage(translation.source_lang);
+              setTargetLanguage(translation.target_lang);
+              setSelectedModel(translation.model);
+              setProgress(translation.progress);
+              setOriginalText(translation.original_text);
+              setTranslatedText(translation.translated_text);
+              if (translation.detected_language) {
+                setDetectedLanguage(translation.detected_language);
               }
-            };
-            
-            const getDetectedLanguageText = () => {
-              if (detectedLanguage) {
-                const langName = getLanguageName(languages, detectedLanguage);
-                return `Detected: ${langName}`;
-              }
-              return '';
-            };
-            
-            const getTranslationDirection = (translation) => {
-              if (translation.source_lang === 'auto' && translation.detected_language) {
-                const detectedName = getLanguageName(languages, translation.detected_language);
-                const targetName = getLanguageName(languages, translation.target_lang);
-                return `Auto(${detectedName}) → ${targetName}`;
-              }
-              const sourceName = getLanguageName(languages, translation.source_lang);
+              
+              setActiveTab('new');
+            } catch (error) {
+              console.error('Error loading translation:', error);
+              setError('Failed to load translation');
+            }
+          };
+          
+          const getDetectedLanguageText = () => {
+            if (detectedLanguage) {
+              const langName = getLanguageName(languages, detectedLanguage);
+              return `Detected: ${langName}`;
+            }
+            return '';
+          };
+          
+          const getTranslationDirection = (translation) => {
+            if (translation.source_lang === 'auto' && translation.detected_language) {
+              const detectedName = getLanguageName(languages, translation.detected_language);
               const targetName = getLanguageName(languages, translation.target_lang);
-              return `${sourceName} → ${targetName}`;
-            };
+              return `Auto(${detectedName}) → ${targetName}`;
+            }
+            const sourceName = getLanguageName(languages, translation.source_lang);
+            const targetName = getLanguageName(languages, translation.target_lang);
+            return `${sourceName} → ${targetName}`;
+          };
+          
+          const getFormattedDate = (dateString) => {
+            const date = new Date(dateString);
+            return new Intl.DateTimeFormat('default', {
+              year: 'numeric',
+              month: 'short',
+              day: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            }).format(date);
+          };
+          
+          return (
+            <div className="space-y-6">
+            {metrics && <MetricsDisplay metrics={metrics} />}
             
-            const getFormattedDate = (dateString) => {
-              const date = new Date(dateString);
-              return new Intl.DateTimeFormat('default', {
-                year: 'numeric',
-                month: 'short',
-                day: 'numeric',
-                hour: '2-digit',
-                minute: '2-digit'
-              }).format(date);
-            };
+            <Card className="w-full max-w-4xl mx-auto">
+            <div className="mb-6">
+            <h1 className="text-2xl font-bold">Book Translator</h1>
+            <p className="text-gray-600">Translate your documents with AI assistance</p>
+            </div>
             
-            return (
+            {error && <ErrorMessage message={error} />}
+            
+            <div className="flex mb-4 border-b">
+            <button 
+            className={`px-4 py-2 ${activeTab === 'new' ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={() => setActiveTab('new')}
+            >
+            New Translation
+            </button>
+            <button 
+            className={`px-4 py-2 ${activeTab === 'history' ? 'border-b-2 border-blue-500' : ''}`}
+            onClick={() => setActiveTab('history')}
+            >
+            Translation History
+            </button>
+            </div>
+            
+            {activeTab === 'new' ? (
               <div className="space-y-6">
-              {metrics && <MetricsDisplay metrics={metrics} />}
-              
-              <Card className="w-full max-w-4xl mx-auto">
-              <div className="mb-6">
-              <h1 className="text-2xl font-bold">Book Translator</h1>
-              <p className="text-gray-600">Translate your documents with AI assistance</p>
+              <div className="grid grid-cols-3 gap-4">
+              <div>
+              <label className="block text-sm font-medium mb-2">Source Language</label>
+              <Select 
+              value={sourceLanguage}
+              onChange={setSourceLanguage}
+              options={languages}
+              placeholder="Select source language"
+              error={formErrors.sourceLanguage}
+              />
+              {detectedLanguage && sourceLanguage === 'auto' && (
+                <p className="text-sm text-gray-500 mt-1">
+                {getDetectedLanguageText()}
+                </p>
+              )}
               </div>
               
-              {error && <ErrorMessage message={error} />}
-              
-              <div className="flex mb-4 border-b">
-              <button 
-              className={`px-4 py-2 ${activeTab === 'new' ? 'border-b-2 border-blue-500' : ''}`}
-              onClick={() => setActiveTab('new')}
-              >
-              New Translation
-              </button>
-              <button 
-              className={`px-4 py-2 ${activeTab === 'history' ? 'border-b-2 border-blue-500' : ''}`}
-              onClick={() => setActiveTab('history')}
-              >
-              Translation History
-              </button>
+              <div>
+              <label className="block text-sm font-medium mb-2">Target Language</label>
+              <Select
+              value={targetLanguage}
+              onChange={setTargetLanguage}
+              options={languages.filter(lang => lang.code !== 'auto')}
+              placeholder="Select target language"
+              error={formErrors.targetLanguage}
+              />
               </div>
               
-              {activeTab === 'new' ? (
-                <div className="space-y-6">
-                <div className="grid grid-cols-3 gap-4">
-                <div>
-                <label className="block text-sm font-medium mb-2">Source Language</label>
-                <Select 
-                value={sourceLanguage}
-                onChange={setSourceLanguage}
-                options={languages}
-                placeholder="Select source language"
-                error={formErrors.sourceLanguage}
-                />
-                {detectedLanguage && sourceLanguage === 'auto' && (
-                  <p className="text-sm text-gray-500 mt-1">
-                  {getDetectedLanguageText()}
-                  </p>
-                )}
-                </div>
-                
-                <div>
-                <label className="block text-sm font-medium mb-2">Target Language</label>
-                <Select
-                value={targetLanguage}
-                onChange={setTargetLanguage}
-                options={languages.filter(lang => lang.code !== 'auto')}
-                placeholder="Select target language"
-                error={formErrors.targetLanguage}
-                />
-                </div>
-                
-                <div>
-                <label className="block text-sm font-medium mb-2">Select Model</label>
-                <Select
-                value={selectedModel}
-                onChange={setSelectedModel}
-                options={models.map(m => ({ code: m.name, name: m.name }))}
-                placeholder="Select AI model"
-                error={formErrors.model}
-                />
-                </div>
-                </div>
-                
-                <FileUpload 
-                onFileChange={handleFileChange} 
-                error={formErrors.file}
-                inputFile={inputFile}
-                />
-                
-                {isTranslating ? (
-                  <ProgressBar progress={progress} />
-                ) : (
-                  <Button
-                  onClick={handleTranslate}
-                  disabled={!sourceLanguage || !targetLanguage || !selectedModel || !inputFile}
-                  className="w-full"
+              <div>
+              <label className="block text-sm font-medium mb-2">Select Model</label>
+              <Select
+              value={selectedModel}
+              onChange={setSelectedModel}
+              options={models.map(m => ({ code: m.name, name: m.name }))}
+              placeholder="Select AI model"
+              error={formErrors.model}
+              />
+              </div>
+              </div>
+              
+              <FileUpload 
+              onFileChange={handleFileChange} 
+              error={formErrors.file}
+              inputFile={inputFile}
+              />
+              
+              {isTranslating ? (
+                <ProgressBar progress={progress} />
+              ) : (
+                <Button
+                onClick={handleTranslate}
+                disabled={!sourceLanguage || !targetLanguage || !selectedModel || !inputFile}
+                className="w-full"
+                >
+                Start Translation
+                </Button>
+              )}
+              
+              <div className="grid grid-cols-2 gap-4">
+              <TextPreview title="Original Text" text={originalText} />
+              <TextPreview title="Translated Text" text={translatedText} />
+              </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+              <div className="flex justify-between items-center">
+              <h2 className="text-lg font-medium">Recent Translations</h2>
+              <Button onClick={fetchTranslations} className="flex items-center gap-2">
+              <Icons.Refresh />
+              Refresh
+              </Button>
+              </div>
+              
+              <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+              <thead className="bg-gray-50">
+              <tr>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">File</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Languages</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
+              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
+              </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+              {translations.map((translation) => (
+                <tr key={translation.id} className="hover:bg-gray-50">
+                <td className="px-6 py-4 whitespace-nowrap">
+                {translation.filename}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                {getTranslationDirection(translation)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                {translation.model}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                <StatusBadge status={translation.status} />
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                {translation.progress.toFixed(1)}%</td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                {getFormattedDate(translation.updated_at)}
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                <div className="flex space-x-2">
+                {translation.status === 'completed' && (
+                  <Button 
+                  onClick={() => handleDownload(translation.id)} 
+                  className="p-2"
+                  title="Download translation"
                   >
-                  Start Translation
+                  <Icons.Download />
                   </Button>
                 )}
-                
-                <div className="grid grid-cols-2 gap-4">
-                <TextPreview title="Original Text" text={originalText} />
-                <TextPreview title="Translated Text" text={translatedText} />
-                </div>
-                </div>
-              ) : (
-                <div className="space-y-4">
-                <div className="flex justify-between items-center">
-                <h2 className="text-lg font-medium">Recent Translations</h2>
-                <Button onClick={fetchTranslations} className="flex items-center gap-2">
-                <Icons.Refresh />
-                Refresh
-                </Button>
-                </div>
-                
-                <div className="overflow-x-auto">
-                <table className="min-w-full divide-y divide-gray-200">
-                <thead className="bg-gray-50">
-                <tr>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">File</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Languages</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
-                <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-                </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                {translations.map((translation) => (
-                  <tr key={translation.id} className="hover:bg-gray-50">
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  {translation.filename}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  {getTranslationDirection(translation)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  {translation.model}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  <StatusBadge status={translation.status} /></td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  {translation.progress.toFixed(1)}%
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  {getFormattedDate(translation.updated_at)}
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="flex space-x-2">
-                  {translation.status === 'completed' && (
-                    <Button 
-                    onClick={() => handleDownload(translation.id)} 
-                    className="p-2"
-                    title="Download translation"
-                    >
-                    <Icons.Download />
-                    </Button>
-                  )}
-                  {translation.status === 'error' && (
-                    <Button 
-                    onClick={() => handleRetryTranslation(translation.id)}
-                    className="p-2"
-                    title="Retry translation"
-                    >
-                    <Icons.Retry />
-                    </Button>
-                  )}
-                  {translation.status === 'in_progress' && (
-                    <Button 
-                    onClick={() => handleContinueTranslation(translation.id)}
-                    className="p-2"
-                    title="Continue translation"
-                    >
-                    <Icons.Play />
-                    </Button>
-                  )}
-                  {translation.error_message && (
-                    <div 
-                    className="text-sm text-red-500 cursor-help"
-                    title={translation.error_message}
-                    >
-                    <Icons.Error />
-                    </div>
-                  )}
+                {translation.status === 'error' && (
+                  <Button 
+                  onClick={() => handleRetryTranslation(translation.id)}
+                  className="p-2"
+                  title="Retry translation"
+                  >
+                  <Icons.Retry />
+                  </Button>
+                )}
+                {translation.status === 'in_progress' && (
+                  <Button 
+                  onClick={() => handleContinueTranslation(translation.id)}
+                  className="p-2"
+                  title="Continue translation"
+                  >
+                  <Icons.Play />
+                  </Button>
+                )}
+                {translation.error_message && (
+                  <div 
+                  className="text-sm text-red-500 cursor-help"
+                  title={translation.error_message}
+                  >
+                  <Icons.Error />
                   </div>
-                  </td>
-                  </tr>
-                ))}
-                </tbody>
-                </table>
+                )}
                 </div>
-                </div>
-              )}
-              </Card>
+                </td>
+                </tr>
+              ))}
+              </tbody>
+              </table>
               </div>
-            );
-              }
-              
-              function getLanguageName(languages, code) {
-                const lang = languages.find(l => l.code === code);
-                return lang ? lang.name : code;
-              }
-              
-              ReactDOM.render(
-                <BookTranslatorUI />,
-                document.getElementById('root')
-              );
+              </div>
+            )}
+            </Card>
+            </div>
+          );
+        }
+      
+      function getLanguageName(languages, code) {
+        const lang = languages.find(l => l.code === code);
+        return lang ? lang.name : code;
+      }
+      
+      ReactDOM.render(
+        <BookTranslatorUI />,
+        document.getElementById('root')
+      );
     </script>
 </body>
 </html>
