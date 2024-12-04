@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import json
 import requests
 import time
@@ -21,7 +20,7 @@ from flask_cors import CORS
 from werkzeug.utils import secure_filename
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app)
 
 # Folders setup
 UPLOAD_FOLDER = 'uploads'
@@ -41,19 +40,16 @@ class AppLogger:
         self.log_dir = log_dir
         os.makedirs(log_dir, exist_ok=True)
         
-        # Main application logger
         self.app_logger = self._setup_logger(
             'app_logger',
             os.path.join(log_dir, 'app.log')
         )
         
-        # Translation process logger
         self.translation_logger = self._setup_logger(
             'translation_logger',
             os.path.join(log_dir, 'translations.log')
         )
         
-        # API calls logger
         self.api_logger = self._setup_logger(
             'api_logger',
             os.path.join(log_dir, 'api.log')
@@ -63,7 +59,6 @@ class AppLogger:
         logger = logging.getLogger(name)
         logger.setLevel(logging.INFO)
         
-        # Rotate log files: max 10MB each, keep 5 backup files
         handler = RotatingFileHandler(
             log_file,
             maxBytes=10*1024*1024,
@@ -154,7 +149,7 @@ class TranslationCache:
                     last_used TIMESTAMP
                 )
             ''')
-    
+
     def _generate_hash(self, text: str, source_lang: str, target_lang: str) -> str:
         key = f"{text}:{source_lang}:{target_lang}"
         return hashlib.sha256(key.encode()).hexdigest()
@@ -172,7 +167,6 @@ class TranslationCache:
             result = cur.fetchone()
             if result:
                 translated_text, created_at = result
-                # Update last used timestamp
                 conn.execute('''
                     UPDATE translation_cache
                     SET last_used = CURRENT_TIMESTAMP
@@ -298,42 +292,42 @@ class BookTranslator:
             },
             'en': {
                 'ru': "Переведи этот английский текст на русский язык. Пропусти подтверждения:\n\n",
-                'de': "Übersetze diesen englischen Text ins Deutsche. Überspringe Bestätigungen:\n\n",
-                'fr': "Traduis ce texte anglais en français. Ignore les confirmations:\n\n",
-                'es': "Traduce este texto inglés al español. Omite confirmaciones:\n\n",
-                'it': "Traduci questo testo inglese in italiano. Salta le conferme:\n\n",
-                'zh': "将这段英语文本翻译成中文。跳过确认：\n\n",
-                'ja': "この英語のテキストを日本語に翻訳してください。確認は省略：\n\n"
+                'de': "Translate this English text to German. Skip confirmations:\n\n",
+                'fr': "Translate this English text to French. Skip confirmations:\n\n",
+                'es': "Translate this English text to Spanish. Skip confirmations:\n\n",
+                'it': "Translate this English text to Italian. Skip confirmations:\n\n",
+                'zh': "Translate this English text to Chinese. Skip confirmations:\n\n",
+                'ja': "Translate this English text to Japanese. Skip confirmations:\n\n"
             },
             'de': {
                 'ru': "Переведи этот немецкий текст на русский язык. Пропусти подтверждения:\n\n",
                 'en': "Translate this German text to English. Skip confirmations:\n\n",
-                'fr': "Traduis ce texte allemand en français. Ignore les confirmations:\n\n",
-                'es': "Traduce este texto alemán al español. Omite confirmaciones:\n\n",
-                'it': "Traduci questo testo tedesco in italiano. Salta le conferme:\n\n",
-                'zh': "将这段德语文本翻译成中文。跳过确认：\n\n",
-                'ja': "このドイツ語のテキストを日本語に翻訳してください。確認は省略：\n\n"
+                'fr': "Übersetze diesen deutschen Text ins Französische. Überspringe Bestätigungen:\n\n",
+                'es': "Übersetze diesen deutschen Text ins Spanische. Überspringe Bestätigungen:\n\n",
+                'it': "Übersetze diesen deutschen Text ins Italienische. Überspringe Bestätigungen:\n\n",
+                'zh': "Übersetze diesen deutschen Text ins Chinesische. Überspringe Bestätigungen:\n\n",
+                'ja': "Übersetze diesen deutschen Text ins Japanische. Überspringe Bestätigungen:\n\n"
             },
             'fr': {
                 'ru': "Переведи этот французский текст на русский язык. Пропусти подтверждения:\n\n",
                 'en': "Translate this French text to English. Skip confirmations:\n\n",
-                'de': "Übersetze diesen französischen Text ins Deutsche. Überspringe Bestätigungen:\n\n",
-                'es': "Traduce este texto francés al español. Omite confirmaciones:\n\n",
-                'it': "Traduci questo testo francese in italiano. Salta le conferme:\n\n",
-                'zh': "将这段法语文本翻译成中文。跳过确认：\n\n",
-                'ja': "このフランス語のテキストを日本語に翻訳してください。確認は省略：\n\n"
+                'de': "Translate this French text to German. Skip confirmations:\n\n",
+                'es': "Translate this French text to Spanish. Skip confirmations:\n\n",
+                'it': "Translate this French text to Italian. Skip confirmations:\n\n",
+                'zh': "Translate this French text to Chinese. Skip confirmations:\n\n",
+                'ja': "Translate this French text to Japanese. Skip confirmations:\n\n"
             },
             'es': {
                 'ru': "Переведи этот испанский текст на русский язык. Пропусти подтверждения:\n\n",
                 'en': "Translate this Spanish text to English. Skip confirmations:\n\n",
-                'de': "Übersetze diesen spanischen Text ins Deutsche. Überspringe Bestätigungen:\n\n",
-                'fr': "Traduis ce texte espagnol en français. Ignore les confirmations:\n\n",
-                'it': "Traduci questo testo spagnolo in italiano. Salta le conferme:\n\n",
-                'zh': "将这段西班牙语文本翻译成中文。跳过确认：\n\n",
-                'ja': "このスペイン語のテキストを日本語に翻訳してください。確認は省略：\n\n"
+                'de': "Translate this Spanish text to German. Skip confirmations:\n\n",
+                'fr': "Translate this Spanish text to French. Skip confirmations:\n\n",
+                'it': "Translate this Spanish text to Italian. Skip confirmations:\n\n",
+                'zh': "Translate this Spanish text to Chinese. Skip confirmations:\n\n",
+                'ja': "Translate this Spanish text to Japanese. Skip confirmations:\n\n"
             }
         }
-        
+
     @with_error_handling
     def detect_language(self, text: str) -> str:
         try:
@@ -354,7 +348,6 @@ class BookTranslator:
             result = response.json()
             detected_lang = result['response'].strip().lower()
             
-            # Map full language names to codes if necessary
             lang_map = {
                 'english': 'en',
                 'russian': 'ru',
@@ -381,8 +374,9 @@ class BookTranslator:
         response.raise_for_status()
         models = response.json()
         return [model['name'] for model in models['models']]
-    
+
     def split_into_chunks(self, text: str) -> List[str]:
+        MAX_CHUNK_SIZE = 4096
         paragraphs = text.replace('\r\n', '\n').split('\n\n')
         chunks = []
         current_chunk = []
@@ -393,13 +387,16 @@ class BookTranslator:
             if not paragraph:
                 continue
             
-            if len(paragraph) > self.chunk_size:
+            if len(paragraph) > MAX_CHUNK_SIZE:
                 if current_chunk:
-                    chunks.append(' '.join(current_chunk))
+                    chunks.append('\n\n'.join(current_chunk))
                     current_chunk = []
                     current_length = 0
                     
                 sentences = paragraph.split('. ')
+                current_sentence = []
+                current_sentence_length = 0
+                
                 for sentence in sentences:
                     sentence = sentence.strip()
                     if not sentence:
@@ -410,17 +407,38 @@ class BookTranslator:
                         
                     sentence_length = len(sentence)
                     
-                    if current_length + sentence_length > self.chunk_size:
-                        if current_chunk:
-                            chunks.append(' '.join(current_chunk))
-                        current_chunk = [sentence]
-                        current_length = sentence_length
+                    if current_sentence_length + sentence_length > MAX_CHUNK_SIZE:
+                        if current_sentence:
+                            chunks.append('. '.join(current_sentence) + '.')
+                            current_sentence = [sentence]
+                            current_sentence_length = sentence_length
+                        else:
+                            words = sentence.split()
+                            current_words = []
+                            current_word_length = 0
+                            
+                            for word in words:
+                                word_length = len(word + ' ')
+                                if current_word_length + word_length > MAX_CHUNK_SIZE:
+                                    if current_words:
+                                        chunks.append(' '.join(current_words))
+                                    current_words = [word]
+                                    current_word_length = word_length
+                                else:
+                                    current_words.append(word)
+                                    current_word_length += word_length
+                                    
+                            if current_words:
+                                chunks.append(' '.join(current_words))
                     else:
-                        current_chunk.append(sentence)
-                        current_length += sentence_length
+                        current_sentence.append(sentence)
+                        current_sentence_length += sentence_length
+                        
+                if current_sentence:
+                    chunks.append('. '.join(current_sentence) + '.')
             else:
-                if current_length + len(paragraph) > self.chunk_size:
-                    chunks.append(' '.join(current_chunk))
+                if current_length + len(paragraph) > MAX_CHUNK_SIZE:
+                    chunks.append('\n\n'.join(current_chunk))
                     current_chunk = [paragraph]
                     current_length = len(paragraph)
                 else:
@@ -428,16 +446,15 @@ class BookTranslator:
                     current_length += len(paragraph)
                     
         if current_chunk:
-            chunks.append(' '.join(current_chunk))
+            chunks.append('\n\n'.join(current_chunk))
             
         return chunks
-    
+
     @with_error_handling
     def translate_chunk(self, chunk: str, source_lang: str, target_lang: str, detected_lang: str = None) -> str:
         if not chunk.strip():
             return ""
         
-        # Check cache first
         cached_translation = cache.get_cached_translation(chunk, source_lang, target_lang)
         if cached_translation:
             logger.translation_logger.info("Cache hit for chunk")
@@ -475,7 +492,6 @@ class BookTranslator:
                 result = response.json()
                 translated_text = result['response'].strip()
                 
-                # Cache successful translation
                 cache.cache_translation(chunk, translated_text, source_lang, target_lang)
                 
                 return translated_text
@@ -490,7 +506,7 @@ class BookTranslator:
                 else:
                     logger.translation_logger.error(f"Final timeout error: {str(e)}")
                     raise
-                    
+                
             except Exception as e:
                 wait_time = (backoff_factor ** attempt) * 5
                 logger.translation_logger.warning(
@@ -501,7 +517,7 @@ class BookTranslator:
                 else:
                     logger.translation_logger.error(f"Final error: {str(e)}")
                     raise
-                    
+                
     def translate_text(self, text: str, source_lang: str, target_lang: str, translation_id: int):
         start_time = time.time()
         success = False
@@ -570,16 +586,18 @@ class BookTranslator:
                             ''', (translated_text, translation_id, i))
                             
                             progress = (i / total_chunks) * 100
+                            current_translation = '\n\n'.join(translated_chunks)
+                            
                             conn.execute('''
                                 UPDATE translations 
                                 SET progress = ?, current_chunk = ?, translated_text = ?,
                                     updated_at = CURRENT_TIMESTAMP
                                 WHERE id = ?
-                            ''', (progress, i, '\n\n'.join(translated_chunks), translation_id))
+                            ''', (progress, i, current_translation, translation_id))
                             
                             yield {
                                 'progress': progress,
-                                'translated_text': '\n\n'.join(translated_chunks),
+                                'translated_text': current_translation,
                                 'current_chunk': i,
                                 'total_chunks': total_chunks,
                                 'detected_language': detected_lang if source_lang == 'auto' else None
@@ -595,7 +613,7 @@ class BookTranslator:
                             WHERE translation_id = ? AND chunk_number = ?
                         ''', (str(e), translation_id, i))
                     raise
-                    
+                
                 if i < total_chunks:
                     time.sleep(2)  # Rate limiting
                     
@@ -629,7 +647,7 @@ class BookTranslator:
         finally:
             translation_time = time.time() - start_time
             monitor.record_translation_attempt(success, translation_time)
-            
+
 # Translation Recovery
 class TranslationRecovery:
     def __init__(self, db_path: str = DB_PATH):
@@ -667,7 +685,7 @@ class TranslationRecovery:
                 WHERE status = 'error'
                 AND created_at < datetime('now', '-? days')
             ''', (days,))
-            
+
 recovery = TranslationRecovery()
 
 # Health checking middleware
@@ -682,7 +700,7 @@ def check_ollama():
             return jsonify({
                 'error': 'Translation service is not available'
             }), 503
-        
+
 # Flask routes
 @app.route('/')
 def serve_frontend():
@@ -731,7 +749,7 @@ def get_translation(translation_id):
         if translation:
             return jsonify(dict(translation))
         return jsonify({'error': 'Translation not found'}), 404
-    
+
 @app.route('/translate', methods=['POST'])
 @with_error_handling
 def translate():
@@ -748,14 +766,12 @@ def translate():
     
     if file.filename == '':
         return jsonify({'error': 'No selected file'}), 400
-
+    
     try:
-        # Save uploaded file
         filename = secure_filename(file.filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
         
-        # Read file content
         text = None
         try:
             with open(filepath, 'r', encoding='utf-8') as f:
@@ -764,7 +780,6 @@ def translate():
             with open(filepath, 'r', encoding='cp1251') as f:
                 text = f.read()
                 
-        # Create translation record
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.execute('''
                 INSERT INTO translations (
@@ -774,13 +789,13 @@ def translate():
             ''', (filename, source_lang, target_lang, model_name, 'in_progress', text))
             translation_id = cur.lastrowid
             
-        # Initialize translator
         translator = BookTranslator(model_name=model_name)
         
         def generate():
             try:
                 for update in translator.translate_text(text, source_lang, target_lang, translation_id):
-                    yield f"data: {json.dumps(update)}\n\n"
+                    # Send raw text without additional escaping
+                    yield f"data: {json.dumps(update, ensure_ascii=False)}\n\n"
             except Exception as e:
                 error_message = str(e)
                 logger.translation_logger.error(f"Translation error: {error_message}")
@@ -793,17 +808,16 @@ def translate():
                 yield f"data: {json.dumps({'error': error_message})}\n\n"
                 
         return Response(generate(), mimetype='text/event-stream')
-
+    
     except Exception as e:
         logger.app_logger.error(f"Translation request error: {str(e)}")
         return jsonify({'error': str(e)}), 500
     finally:
-        # Cleanup uploaded file
         try:
             os.remove(filepath)
         except Exception as e:
             logger.app_logger.error(f"Failed to cleanup uploaded file: {str(e)}")
-            
+
 @app.route('/download/<int:translation_id>', methods=['GET'])
 @with_error_handling
 def download_translation(translation_id):
@@ -820,7 +834,7 @@ def download_translation(translation_id):
         
         filename, translated_text = result
         
-        # Create download file
+        # Create download file with raw text
         download_path = os.path.join(TRANSLATIONS_FOLDER, f'translated_{filename}')
         with open(download_path, 'w', encoding='utf-8') as f:
             f.write(translated_text)
@@ -830,7 +844,7 @@ def download_translation(translation_id):
             as_attachment=True,
             download_name=f'translated_{filename}'
         )
-    
+
 @app.route('/failed-translations', methods=['GET'])
 @with_error_handling
 def get_failed_translations():
@@ -849,15 +863,12 @@ def get_metrics():
 @app.route('/health', methods=['GET'])
 def health_check():
     try:
-        # Check if Ollama API is accessible
         response = requests.get("http://localhost:11434/api/tags", timeout=5)
         response.raise_for_status()
         
-        # Check database
         with sqlite3.connect(DB_PATH) as conn:
             conn.execute('SELECT 1')
             
-        # Check disk space
         disk_usage = psutil.disk_usage('/')
         if disk_usage.percent > 90:
             logger.app_logger.warning("Low disk space")
@@ -874,8 +885,7 @@ def health_check():
             'status': 'unhealthy',
             'error': str(e)
         }), 503
-    
-# Cleanup task
+
 def cleanup_old_data():
     while True:
         try:
@@ -886,8 +896,7 @@ def cleanup_old_data():
         except Exception as e:
             logger.app_logger.error(f"Cleanup task error: {str(e)}")
             time.sleep(60 * 60)  # Retry in an hour
-            
-# Start cleanup thread
+
 cleanup_thread = threading.Thread(target=cleanup_old_data, daemon=True)
 cleanup_thread.start()
 
