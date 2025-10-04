@@ -8,8 +8,9 @@
   <p><strong>Two-step process. For better quality.</strong></p>
 </div>
   <p>The tool processes text files using Ollama LLM models with a two-stage approach: primary translation followed by AI self-reflection and refinement for better results. Suitable for translators, publishers, authors, researchers and content creators who need to translate large text documents.</p>
-Support for multiple languages including English, Russian, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, and Korean. Genre-specific modes (fiction, technical, academic, business, poetry), real-time translation progress tracking for both stages, translation history and status monitoring, automatic error recovery and retry mechanisms, and multi-format export (TXT, PDF, EPUB).  <br>   <br> 
-![Book Translator Demo](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
+Support for multiple languages including English, Russian, Spanish, French, German, Italian, Portuguese, Chinese, and Japanese.  Genre-specific modes (fiction, technical, academic, business, poetry), real-time translation progress tracking for both stages, translation history and status monitoring, automatic error recovery and retry mechanisms, and multi-format export (TXT, PDF, EPUB).  <br>   <br> 
+
+<img width="1191" height="889" alt="Screenshot 2025-10-04 at 12 54 17" src="https://github.com/user-attachments/assets/35838c1c-26be-4594-a759-dbaa76a9494f" />
 
 ## Requirements
 
@@ -93,8 +94,8 @@ MIT License - see [LICENSE](LICENSE)
 ---
 
 If you like this project, please give it a star ⭐
-
 For questions, feedback, or support, open an issue or submit a PR.
+
 ---
 
-> **Note:** The previous version of this project is available in the `archive-old-version` branch.
+**Note:** The previous version of this project is available in the `archive-old-version` branch.
