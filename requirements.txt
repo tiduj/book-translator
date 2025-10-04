@@ -1,20 +1,13 @@
+# Core dependencies
 Flask==3.0.0
 Flask-CORS==4.0.0
-Werkzeug==3.0.1
 requests==2.31.0
-tqdm==4.66.1
-python-dotenv==1.0.0
+psutil==5.9.6
+
+# Production server
 gunicorn==21.2.0
-SQLAlchemy==2.0.25
-pytest==7.4.4
-flake8==7.0.0
+
+# Development tools (optional)
+pytest==7.4.3
 black==23.12.1
-mypy==1.8.0
-isort==5.13.2
-pre-commit==3.6.0
-pytest-cov==4.1.0
-coverage==7.4.0
-pylint==3.0.3
-types-requests==2.31.0.20240106
-types-Flask==1.1.6
-types-Flask-Cors==4.0.0.20240106
+flake8==6.1.0

@@ -4,768 +4,1083 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Book Translator</title>
-    
-    <!-- React -->
-    <script src="https://unpkg.com/react@17/umd/react.development.js"></script>
-    <script src="https://unpkg.com/react-dom@17/umd/react-dom.development.js"></script>
-    <script src="https://unpkg.com/babel-standalone@6.26.0/babel.min.js"></script>
-    
-    <!-- Tailwind CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-    
     <style>
-        .error-shake {
-            animation: shake 0.5s cubic-bezier(.36,.07,.19,.97) both;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        
-        @keyframes shake {
-            10%, 90% { transform: translate3d(-1px, 0, 0); }
-            20%, 80% { transform: translate3d(2px, 0, 0); }
-            30%, 50%, 70% { transform: translate3d(-4px, 0, 0); }
-            40%, 60% { transform: translate3d(4px, 0, 0); }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: #f5f5f5;
+            min-height: 100vh;
+            padding: 20px;
         }
-        
-        .loading-indicator {
-            width: 20px;
-            height: 20px;
-            border: 3px solid #ffffff;
-            border-radius: 50%;
-            border-top-color: transparent;
-            animation: spin 1s linear infinite;
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
         }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+
+        /* Stats Cards */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .stat-card.blue { background: #e3f2fd; }
+        .stat-card.green { background: #e8f5e9; }
+        .stat-card.purple { background: #f3e5f5; }
+        .stat-card.gray { background: #f5f5f5; }
+
+        .stat-label {
+            font-size: 0.75rem;
+            color: #666;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #333;
+        }
+
+        .stat-card.blue .stat-value { color: #1976d2; }
+        .stat-card.green .stat-value { color: #388e3c; }
+        .stat-card.purple .stat-value { color: #7b1fa2; }
+        .stat-card.gray .stat-value { color: #424242; }
+
+        /* Main Card */
+        .main-card {
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            padding: 30px;
+            margin-bottom: 20px;
+        }
+
+        .header {
+            margin-bottom: 25px;
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .tab {
+            padding: 12px 20px;
+            background: none;
+            border: none;
+            border-bottom: 2px solid transparent;
+            cursor: pointer;
+            font-size: 0.95rem;
+            color: #666;
+            transition: all 0.3s;
+        }
+
+        .tab.active {
+            color: #333;
+            border-bottom-color: #2196f3;
+            font-weight: 500;
+        }
+
+        .tab:hover {
+            color: #333;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Form */
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 8px;
+        }
+
+        .form-group select {
+            padding: 10px 12px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            background: white;
+            color: #333;
+            cursor: pointer;
+        }
+
+        .form-group select:focus {
+            outline: none;
+            border-color: #2196f3;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            border: 2px dashed #ddd;
+            border-radius: 4px;
+            padding: 50px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-bottom: 25px;
+            background: #fafafa;
+        }
+
+        .upload-section:hover {
+            border-color: #2196f3;
+            background: #f5f9ff;
+        }
+
+        .upload-section.dragover {
+            border-color: #2196f3;
+            background: #e3f2fd;
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            margin-bottom: 15px;
+            color: #999;
+        }
+
+        .upload-section h3 {
+            font-size: 1rem;
+            font-weight: 500;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .upload-section p {
+            font-size: 0.85rem;
+            color: #999;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        /* Button */
+        .btn-translate {
+            width: 100%;
+            padding: 14px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-translate:hover {
+            background: #1976d2;
+        }
+
+        /* Export Buttons */
+        .export-buttons {
+            display: flex;
+            gap: 15px;
+            margin-top: 25px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+
+        .btn-export {
+            padding: 12px 24px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.95rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .btn-export:hover {
+            background: #1976d2;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        }
+
+        .btn-export:active {
+            transform: translateY(0);
+        }
+
+        .btn-translate:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Text Panels */
+        .text-panels {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-top: 25px;
+        }
+
+        .text-panel {
+            background: #fafafa;
+            border: 1px solid #e0e0e0;
+            border-radius: 4px;
+            padding: 15px;
+            min-height: 300px;
+        }
+
+        .text-panel h3 {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .text-panel-content {
+            font-size: 0.85rem;
+            line-height: 1.7;
+            color: #555;
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .text-panel-content::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .text-panel-content::-webkit-scrollbar-thumb {
+            background: #ccc;
+            border-radius: 3px;
+        }
+
+        /* Progress */
+        .progress-section {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .progress-bar-container {
+            background: #e0e0e0;
+            border-radius: 4px;
+            height: 8px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: #2196f3;
+            transition: width 0.3s;
+        }
+
+        .progress-info {
+            text-align: center;
+            color: #666;
+            font-size: 0.85rem;
+        }
+
+        /* History */
+        .history-item {
+            background: #fafafa;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #e0e0e0;
+        }
+
+        .history-item-info {
+            flex: 1;
+        }
+
+        .history-item-title {
+            font-weight: 500;
+            margin-bottom: 5px;
+            color: #333;
+        }
+
+        .history-item-meta {
+            font-size: 0.8rem;
+            color: #999;
+        }
+
+        .status-badge {
+            padding: 4px 10px;
+            border-radius: 3px;
+            font-size: 0.75rem;
+            font-weight: 500;
+            margin-right: 10px;
+            text-transform: uppercase;
+        }
+
+        .status-completed {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .status-in-progress {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .status-error {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .btn-small {
+            padding: 6px 14px;
+            background: #2196f3;
+            color: white;
+            border: none;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-small:hover {
+            background: #1976d2;
+        }
+
+        .selected-file {
+            background: #e3f2fd;
+            padding: 12px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            display: none;
+            font-size: 0.9rem;
+            color: #1976d2;
+        }
+
+        .selected-file.show {
+            display: block;
         }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-
-    <script type="text/babel">
-        const API_URL = 'http://127.0.0.1:5001';
-
-        // Icons Component
-        const Icons = {
-            Upload: () => (
-                <svg className="w-8 h-8 mb-2 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/>
-                </svg>
-            ),
-            Refresh: () => (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-            ),
-            Download: () => (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                </svg>
-            ),
-            Error: () => (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            ),
-            Play: () => (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"/>
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-            ),
-            Retry: () => (
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" 
-                          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/>
-                </svg>
-            )
-        };
-
-        // Custom Hooks
-        const useInterval = (callback, delay) => {
-            const savedCallback = React.useRef();
-
-            React.useEffect(() => {
-                savedCallback.current = callback;
-            }, [callback]);
-
-            React.useEffect(() => {
-                if (delay !== null) {
-                    const id = setInterval(() => savedCallback.current(), delay);
-                    return () => clearInterval(id);
-                }
-            }, [delay]);
-        };
-
-        const useDebounce = (value, delay) => {
-            const [debouncedValue, setDebouncedValue] = React.useState(value);
-
-            React.useEffect(() => {
-                const handler = setTimeout(() => {
-                    setDebouncedValue(value);
-                }, delay);
-
-                return () => {
-                    clearTimeout(handler);
-                };
-            }, [value, delay]);
-
-            return debouncedValue;
-        };
-
-        // Components
-        const Card = ({ children, className = "" }) => (
-            <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>{children}</div>
-        );
-
-        const Button = ({ children, onClick, disabled, className = "", loading = false, title }) => (
-            <button
-                onClick={onClick}
-                disabled={disabled || loading}
-                className={`relative px-4 py-2 rounded-md text-white bg-blue-500 hover:bg-blue-600 
-                          disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 
-                          ${className}`}
-                title={title}
-            >
-                {loading && (
-                    <span className="absolute inset-0 flex items-center justify-center">
-                        <div className="loading-indicator"></div>
-                    </span>
-                )}
-                <span className={loading ? 'invisible' : ''}>{children}</span>
-            </button>
-        );
-
-        const Select = ({ value, onChange, options, placeholder, error }) => (
-            <div>
-                <select
-                    value={value}
-                    onChange={(e) => onChange(e.target.value)}
-                    className={`w-full p-2 border rounded-md transition-colors duration-200
-                              ${error ? 'border-red-500' : 'border-gray-300'}`}
-                >
-                    <option value="">{placeholder}</option>
-                    {options.map(opt => (
-                        <option key={opt.code} value={opt.code}>{opt.name}</option>
-                    ))}
-                </select>
-                {error && (
-                    <p className="mt-1 text-sm text-red-500">{error}</p>
-                )}
+    <div class="container">
+        <!-- Stats -->
+        <div class="stats">
+            <div class="stat-card blue">
+                <div class="stat-label">Success Rate</div>
+                <div class="stat-value" id="successRate">100.0%</div>
             </div>
-        );
-
-        const ErrorMessage = ({ message }) => (
-            <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mb-4 error-shake">
-                <span className="block sm:inline">{message}</span>
+            <div class="stat-card green">
+                <div class="stat-label">Avg Translation Time</div>
+                <div class="stat-value" id="avgTime">86.1s</div>
             </div>
-        );
-
-        const StatusBadge = ({ status }) => {
-            const statusColors = {
-                completed: 'bg-green-100 text-green-800 border-green-200',
-                in_progress: 'bg-blue-100 text-blue-800 border-blue-200',
-                error: 'bg-red-100 text-red-800 border-red-200',
-                pending: 'bg-yellow-100 text-yellow-800 border-yellow-200'
-            };
-
-            return (
-                <span className={`px-2 py-1 text-sm rounded-full border ${statusColors[status] || 'bg-gray-100'}`}>
-                    {status}
-                </span>
-            );
-        };
-
-        const MetricsDisplay = ({ metrics }) => (
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-                <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-blue-600">Success Rate</h4>
-                    <p className="text-2xl font-bold text-blue-900">
-                        {metrics.translation_metrics.success_rate.toFixed(1)}%
-                    </p>
-                </div>
-                <div className="bg-green-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-green-600">Avg Translation Time</h4>
-                    <p className="text-2xl font-bold text-green-900">
-                        {metrics.translation_metrics.average_translation_time.toFixed(1)}s
-                    </p>
-                </div>
-                <div className="bg-purple-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-purple-600">CPU Usage</h4>
-                    <p className="text-2xl font-bold text-purple-900">
-                        {metrics.system_metrics.cpu_percent}%
-                    </p>
-                </div>
-                <div className="bg-orange-50 p-4 rounded-lg">
-                    <h4 className="text-sm font-medium text-orange-600">Memory Usage</h4>
-                    <p className="text-2xl font-bold text-orange-900">
-                        {metrics.system_metrics.memory_percent}%
-                    </p>
-                </div>
+            <div class="stat-card purple">
+                <div class="stat-label">CPU Usage</div>
+                <div class="stat-value" id="cpuUsage">10.6%</div>
             </div>
-        );
-
-        const ProgressBar = ({ progress }) => (
-            <div className="relative pt-1">
-                <div className="flex mb-2 items-center justify-between">
-                    <div>
-                        <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-blue-600 bg-blue-200">
-                            Translation in progress
-                        </span>
-                    </div>
-                    <div className="text-right">
-                        <span className="text-xs font-semibold inline-block text-blue-600">
-                            {progress.toFixed(1)}%
-                        </span>
-                    </div>
-                </div>
-                <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-blue-200">
-                    <div 
-                        className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-300"
-                        style={{ width: `${progress}%` }}
-                    ></div>
-                </div>
+            <div class="stat-card gray">
+                <div class="stat-label">Memory Usage</div>
+                <div class="stat-value" id="memoryUsage">55.8%</div>
             </div>
-        );
+        </div>
 
-        const FileUpload = ({ onFileChange, error }) => (
-            <div>
-                <label className="block text-sm font-medium mb-2">Upload File</label>
-                <div className="flex items-center justify-center w-full">
-                    <label className={`flex flex-col items-center justify-center w-full h-32 
-                                    border-2 border-dashed rounded-lg cursor-pointer 
-                                    bg-gray-50 hover:bg-gray-100 transition-colors duration-200
-                                    ${error ? 'border-red-500' : 'border-gray-300'}`}>
-                        <div className="flex flex-col items-center justify-center pt-5 pb-6">
-                            <Icons.Upload />
-                            <p className="mb-2 text-sm text-gray-500">
-                                <span className="font-semibold">Click to upload</span> or drag and drop
-                            </p>
-                            <p className="text-xs text-gray-500">TXT files only (max 10MB)</p>
+        <!-- Main Card -->
+        <div class="main-card">
+            <div class="header">
+                <h1>Book Translator</h1>
+                <p>Translate your books and large documents</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchTab('new')">New Translation</button>
+                <button class="tab" onclick="switchTab('history')">Translation History</button>
+            </div>
+
+            <!-- New Translation Tab -->
+            <div class="tab-content active" id="newTranslationTab">
+                <form id="translationForm">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="sourceLanguage">Source Language</label>
+                            <select id="sourceLanguage" required>
+                                <option value="en">English</option>
+                                <option value="ru">Russian</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="it">Italian</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ja">Japanese</option>
+                            </select>
                         </div>
-                        <input
-                            type="file"
-                            className="hidden"
-                            accept=".txt"
-                            onChange={onFileChange}
-                        />
-                    </label>
-                </div>
-                {error && (
-                    <p className="text-sm text-red-500 mt-1">{error}</p>
-                )}
-            </div>
-        );
 
-        const TextPreview = ({ title, text }) => (
-            <div>
-                <h3 className="font-medium mb-2">{title}</h3>
-                <div className="bg-gray-50 p-4 rounded-lg h-96 overflow-auto">
-                    <pre className="whitespace-pre-wrap font-mono text-sm">
-                        {text}
-                    </pre>
+                        <div class="form-group">
+                            <label for="targetLanguage">Target Language</label>
+                            <select id="targetLanguage" required>
+                                <option value="ru">Russian</option>
+                                <option value="en">English</option>
+                                <option value="es">Spanish</option>
+                                <option value="fr">French</option>
+                                <option value="de">German</option>
+                                <option value="it">Italian</option>
+                                <option value="zh">Chinese</option>
+                                <option value="ja">Japanese</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="model">Select Model</label>
+                            <select id="model" required>
+                                <option value="">⏳ Loading models...</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="genre">Text Genre</label>
+                            <select id="genre" required>
+                                <option value="unknown">Unknown / Auto</option>
+                                <option value="fiction">Fiction / Novel</option>
+                                <option value="technical">Technical</option>
+                                <option value="academic">Academic</option>
+                                <option value="business">Business</option>
+                                <option value="poetry">Poetry</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="selected-file" id="selectedFile">
+                        <span id="selectedFileName"></span>
+                    </div>
+
+                    <div class="upload-section" id="uploadSection">
+                        <div class="upload-icon">☁️</div>
+                        <h3>Click to upload or drag and drop</h3>
+                        <p>TXT files only (max 10MB)</p>
+                        <input type="file" id="fileInput" class="file-input" accept=".txt" required>
+                    </div>
+
+                    <button type="submit" class="btn-translate" id="translateBtn">
+                        Start Translation
+                    </button>
+
+                    <div class="progress-section" id="progressSection">
+                        <div class="progress-bar-container">
+                            <div class="progress-bar" id="progressBar"></div>
+                        </div>
+                        <div class="progress-info" id="progressInfo">Initializing...</div>
+                    </div>
+
+                    <div class="text-panels">
+                        <div class="text-panel">
+                            <h3>Original Text</h3>
+                            <div class="text-panel-content" id="originalText">
+                                No content yet
+                            </div>
+                        </div>
+                        <div class="text-panel">
+                            <h3>Stage 1: Primary Translation</h3>
+                            <div class="text-panel-content" id="machineTranslation">
+                                No content yet
+                            </div>
+                        </div>
+                        <div class="text-panel">
+                            <h3>Stage 2: Self-Reflection</h3>
+                            <div class="text-panel-content" id="literaryRefinement">
+                                No content yet
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Export Buttons -->
+                    <div class="export-buttons" id="exportButtons" style="display: none;">
+                        <button type="button" class="btn-export" onclick="copyToClipboard()">
+                            Copy to Clipboard
+                        </button>
+                        <button type="button" class="btn-export" onclick="saveAsTxt()">
+                            Save as TXT
+                        </button>
+                        <button type="button" class="btn-export" onclick="saveAsPdf()">
+                            Save as PDF
+                        </button>
+                        <button type="button" class="btn-export" onclick="saveAsEpub()">
+                            Save as EPUB
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Translation History Tab -->
+            <div class="tab-content" id="historyTab">
+                <div id="historyList">
+                    <p style="text-align: center; color: #999; padding: 40px;">No translations yet</p>
                 </div>
             </div>
-        );
+        </div>
+    </div>
 
-        function BookTranslatorUI() {
-            // State
-            const [sourceLanguage, setSourceLanguage] = React.useState('');
-            const [targetLanguage, setTargetLanguage] = React.useState('');
-            const [selectedModel, setSelectedModel] = React.useState('');
-            const [inputFile, setInputFile] = React.useState(null);
-            const [isTranslating, setIsTranslating] = React.useState(false);
-            const [progress, setProgress] = React.useState(0);
-            const [models, setModels] = React.useState([]);
-            const [originalText, setOriginalText] = React.useState('');
-            const [translatedText, setTranslatedText] = React.useState('');
-            const [translations, setTranslations] = React.useState([]);
-            const [activeTab, setActiveTab] = React.useState('new');
-            const [detectedLanguage, setDetectedLanguage] = React.useState(null);
-            const [error, setError] = React.useState(null);
-            const [metrics, setMetrics] = React.useState(null);
-            const [formErrors, setFormErrors] = React.useState({});
-            
-            // Constants
-            const languages = [
-                { code: 'auto', name: 'Auto Detect' },
-                { code: 'ru', name: 'Russian' },
-                { code: 'en', name: 'English' },
-                { code: 'de', name: 'German' },
-                { code: 'fr', name: 'French' },
-                { code: 'es', name: 'Spanish' },
-                { code: 'it', name: 'Italian' },
-                { code: 'zh', name: 'Chinese' },
-                { code: 'ja', name: 'Japanese' }
-            ];
-            
-          // Effects// Effects
-          React.useEffect(() => {
-            fetchModels();
-            fetchTranslations();
-            fetchMetrics();
-          }, []);
-          
-          useInterval(() => {
-            if (activeTab === 'history') {
-              fetchTranslations();
-            }
-            fetchMetrics();
-          }, 30000);
-          
-          // API calls
-          const fetchModels = async () => {
-            try {
-              setError(null);
-              const response = await fetch(`${API_URL}/models`);
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              if (data.models) {
-                setModels(data.models);
-              }
-            } catch (error) {
-              console.error('Error fetching models:', error);
-              setError('Failed to load models. Please check if the server is running.');
-            }
-          };
-          
-          const fetchTranslations = async () => {
-            try {
-              setError(null);
-              const response = await fetch(`${API_URL}/translations`);
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const data = await response.json();
-              if (data.translations) {
-                setTranslations(data.translations);
-              }
-            } catch (error) {
-              console.error('Error fetching translations:', error);
-              setError('Failed to load translations. Please check if the server is running.');
-            }
-          };
-          
-          const fetchMetrics = async () => {
-            try {
-              const response = await fetch(`${API_URL}/metrics`);
-              if (response.ok) {
-                const data = await response.json();
-                setMetrics(data);
-              }
-            } catch (error) {
-              console.error('Error fetching metrics:', error);
-            }
-          };
-          
-          // Event handlers
-          const handleFileChange = (event) => {
-            const file = event.target.files[0];
-            if (file) {
-              if (file.size > 10 * 1024 * 1024) { // 10MB limit
-                setFormErrors({...formErrors, file: 'File size exceeds 10MB limit'});
-                return;
-              }
-              
-              setInputFile(file);
-              const reader = new FileReader();
-              reader.onload = (e) => {
-                setOriginalText(e.target.result);
-              };
-              reader.onerror = () => {
-                setFormErrors({...formErrors, file: 'Failed to read file'});
-              };
-              reader.readAsText(file);
-            }
-          };
-          
-          const validateForm = () => {
-            const errors = {};
-            
-            if (!sourceLanguage) {
-              errors.sourceLanguage = 'Source language is required';
-            }
-            
-            if (!targetLanguage) {
-              errors.targetLanguage = 'Target language is required';
-            }
-            
-            if (!selectedModel) {
-              errors.model = 'Model selection is required';
-            }
-            
-            if (!inputFile) {
-              errors.file = 'Please select a file';
-            }
-            
-            setFormErrors(errors);
-            return Object.keys(errors).length === 0;
-          };
-          
-          const handleTranslate = async () => {
-            if (!validateForm()) {
-              return;
-            }
-            
-            setIsTranslating(true);
-            setProgress(0);
-            setDetectedLanguage(null);
-            setError(null);
-            
-            const formData = new FormData();
-            formData.append('file', inputFile);
-            formData.append('sourceLanguage', sourceLanguage);
-            formData.append('targetLanguage', targetLanguage);
-            formData.append('model', selectedModel);
-            
-            try {
-              const response = await fetch(`${API_URL}/translate`, {
-                method: 'POST',
-                body: formData
-              });
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const reader = response.body.getReader();
-              const decoder = new TextDecoder();
-              let buffer = '';
-              
-              while (true) {
-                const { done, value } = await reader.read();
-                if (done) break;
-                
-                buffer += decoder.decode(value, { stream: true });
-                const lines = buffer.split('\n');
-                
-                buffer = lines.pop() || '';
-                
-                for (const line of lines) {
-                  if (line.trim() && line.startsWith('data: ')) {
-                    try {
-                      const data = JSON.parse(line.slice(6).trim());
-                      if (data.error) {
-                        setError(`Translation error: ${data.error}`);
-                        setIsTranslating(false);
-                        return;
-                      }
-                      if (data.progress !== undefined) {
-                        setProgress(data.progress);
-                      }
-                      if (data.translated_text) {
-                        setTranslatedText(data.translated_text);
-                      }
-                      if (data.detected_language) {
-                        setDetectedLanguage(data.detected_language);
-                      }
-                    } catch (e) {
-                      console.error('Error parsing SSE data:', e);
-                      console.debug('Problematic line:', line);
-                    }
-                  }
+    <script>
+        const API_URL = 'http://localhost:5001';
+        let selectedFile = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadModels();
+            loadTranslations();
+            loadStats();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            const uploadSection = document.getElementById('uploadSection');
+            const fileInput = document.getElementById('fileInput');
+
+            uploadSection.addEventListener('click', () => fileInput.click());
+
+            uploadSection.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadSection.classList.add('dragover');
+            });
+
+            uploadSection.addEventListener('dragleave', () => {
+                uploadSection.classList.remove('dragover');
+            });
+
+            uploadSection.addEventListener('drop', (e) => {
+                e.preventDefault();
+                uploadSection.classList.remove('dragover');
+                const files = e.dataTransfer.files;
+                if (files.length > 0) {
+                    fileInput.files = files;
+                    handleFileSelect(files[0]);
                 }
-              }
-            } catch (error) {
-              console.error('Translation error:', error);
-              setError('Translation failed. Please try again.');
-            } finally {
-              setIsTranslating(false);
-              fetchTranslations();
-            }
-          };
-          
-          const handleDownload = async (translationId) => {
-            try {
-              window.open(`${API_URL}/download/${translationId}`, '_blank');
-            } catch (error) {
-              console.error('Download error:', error);
-              setError('Failed to download translation');
-            }
-          };
-          
-          const handleRetryTranslation = async (translationId) => {
-            try {
-              const response = await fetch(`${API_URL}/retry-translation/${translationId}`, {
-                method: 'POST'
-              });
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              await fetchTranslations();
-            } catch (error) {
-              console.error('Retry error:', error);
-              setError('Failed to retry translation');
-            }
-          };
-          
-          const handleContinueTranslation = async (translationId) => {
-            try {
-              const response = await fetch(`${API_URL}/translations/${translationId}`);
-              
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
-              
-              const translation = await response.json();
-              
-              setSourceLanguage(translation.source_lang);
-              setTargetLanguage(translation.target_lang);
-              setSelectedModel(translation.model);
-              setProgress(translation.progress);
-              setOriginalText(translation.original_text);
-              setTranslatedText(translation.translated_text);
-              if (translation.detected_language) {
-                setDetectedLanguage(translation.detected_language);
-              }
-              
-              setActiveTab('new');
-            } catch (error) {
-              console.error('Error loading translation:', error);
-              setError('Failed to load translation');
-            }
-          };
-          
-          const getDetectedLanguageText = () => {
-            if (detectedLanguage) {
-              const langName = getLanguageName(languages, detectedLanguage);
-              return `Detected: ${langName}`;
-            }
-            return '';
-          };
-          
-          const getTranslationDirection = (translation) => {
-            if (translation.source_lang === 'auto' && translation.detected_language) {
-              const detectedName = getLanguageName(languages, translation.detected_language);
-              const targetName = getLanguageName(languages, translation.target_lang);
-              return `Auto(${detectedName}) → ${targetName}`;
-            }
-            const sourceName = getLanguageName(languages, translation.source_lang);
-            const targetName = getLanguageName(languages, translation.target_lang);
-            return `${sourceName} → ${targetName}`;
-          };
-          
-          const getFormattedDate = (dateString) => {
-            const date = new Date(dateString);
-            return new Intl.DateTimeFormat('default', {
-              year: 'numeric',
-              month: 'short',
-              day: 'numeric',
-              hour: '2-digit',
-              minute: '2-digit'
-            }).format(date);
-          };
-          
-          return (
-            <div className="space-y-6">
-            {metrics && <MetricsDisplay metrics={metrics} />}
-            
-            <Card className="w-full max-w-4xl mx-auto">
-            <div className="mb-6">
-            <h1 className="text-2xl font-bold">Book Translator</h1>
-            <p className="text-gray-600">Translate your documents with AI assistance</p>
-            </div>
-            
-            {error && <ErrorMessage message={error} />}
-            
-            <div className="flex mb-4 border-b">
-            <button 
-            className={`px-4 py-2 ${activeTab === 'new' ? 'border-b-2 border-blue-500' : ''}`}
-            onClick={() => setActiveTab('new')}
-            >
-            New Translation
-            </button>
-            <button 
-            className={`px-4 py-2 ${activeTab === 'history' ? 'border-b-2 border-blue-500' : ''}`}
-            onClick={() => setActiveTab('history')}
-            >
-            Translation History
-            </button>
-            </div>
-            
-            {activeTab === 'new' ? (
-              <div className="space-y-6">
-              <div className="grid grid-cols-3 gap-4">
-              <div>
-              <label className="block text-sm font-medium mb-2">Source Language</label>
-              <Select 
-              value={sourceLanguage}
-              onChange={setSourceLanguage}
-              options={languages}
-              placeholder="Select source language"
-              error={formErrors.sourceLanguage}
-              />
-              {detectedLanguage && sourceLanguage === 'auto' && (
-                <p className="text-sm text-gray-500 mt-1">
-                {getDetectedLanguageText()}
-                </p>
-              )}
-              </div>
-              
-              <div>
-              <label className="block text-sm font-medium mb-2">Target Language</label>
-              <Select
-              value={targetLanguage}
-              onChange={setTargetLanguage}
-              options={languages.filter(lang => lang.code !== 'auto')}
-              placeholder="Select target language"
-              error={formErrors.targetLanguage}
-              />
-              </div>
-              
-              <div>
-              <label className="block text-sm font-medium mb-2">Select Model</label>
-              <Select
-              value={selectedModel}
-              onChange={setSelectedModel}
-              options={models.map(m => ({ code: m.name, name: m.name }))}
-              placeholder="Select AI model"
-              error={formErrors.model}
-              />
-              </div>
-              </div>
-              
-              <FileUpload 
-              onFileChange={handleFileChange} 
-              error={formErrors.file}
-              inputFile={inputFile}
-              />
-              
-              {isTranslating ? (
-                <ProgressBar progress={progress} />
-              ) : (
-                <Button
-                onClick={handleTranslate}
-                disabled={!sourceLanguage || !targetLanguage || !selectedModel || !inputFile}
-                className="w-full"
-                >
-                Start Translation
-                </Button>
-              )}
-              
-              <div className="grid grid-cols-2 gap-4">
-              <TextPreview title="Original Text" text={originalText} />
-              <TextPreview title="Translated Text" text={translatedText} />
-              </div>
-              </div>
-            ) : (
-              <div className="space-y-4">
-              <div className="flex justify-between items-center">
-              <h2 className="text-lg font-medium">Recent Translations</h2>
-              <Button onClick={fetchTranslations} className="flex items-center gap-2">
-              <Icons.Refresh />
-              Refresh
-              </Button>
-              </div>
-              
-              <div className="overflow-x-auto">
-              <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
-              <tr>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">File</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Languages</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Model</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Status</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Progress</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Updated</th>
-              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Actions</th>
-              </tr>
-              </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
-              {translations.map((translation) => (
-                <tr key={translation.id} className="hover:bg-gray-50">
-                <td className="px-6 py-4 whitespace-nowrap">
-                {translation.filename}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                {getTranslationDirection(translation)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                {translation.model}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                <StatusBadge status={translation.status} />
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                {translation.progress.toFixed(1)}%</td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                {getFormattedDate(translation.updated_at)}
-                </td>
-                <td className="px-6 py-4 whitespace-nowrap">
-                <div className="flex space-x-2">
-                {translation.status === 'completed' && (
-                  <Button 
-                  onClick={() => handleDownload(translation.id)} 
-                  className="p-2"
-                  title="Download translation"
-                  >
-                  <Icons.Download />
-                  </Button>
-                )}
-                {translation.status === 'error' && (
-                  <Button 
-                  onClick={() => handleRetryTranslation(translation.id)}
-                  className="p-2"
-                  title="Retry translation"
-                  >
-                  <Icons.Retry />
-                  </Button>
-                )}
-                {translation.status === 'in_progress' && (
-                  <Button 
-                  onClick={() => handleContinueTranslation(translation.id)}
-                  className="p-2"
-                  title="Continue translation"
-                  >
-                  <Icons.Play />
-                  </Button>
-                )}
-                {translation.error_message && (
-                  <div 
-                  className="text-sm text-red-500 cursor-help"
-                  title={translation.error_message}
-                  >
-                  <Icons.Error />
-                  </div>
-                )}
-                </div>
-                </td>
-                </tr>
-              ))}
-              </tbody>
-              </table>
-              </div>
-              </div>
-            )}
-            </Card>
-            </div>
-          );
+            });
+
+            fileInput.addEventListener('change', (e) => {
+                if (e.target.files.length > 0) {
+                    handleFileSelect(e.target.files[0]);
+                }
+            });
+
+            document.getElementById('translationForm').addEventListener('submit', handleSubmit);
         }
-      
-      function getLanguageName(languages, code) {
-        const lang = languages.find(l => l.code === code);
-        return lang ? lang.name : code;
-      }
-      
-      ReactDOM.render(
-        <BookTranslatorUI />,
-        document.getElementById('root')
-      );
+
+        function handleFileSelect(file) {
+            selectedFile = file;
+            document.getElementById('selectedFileName').textContent = `Selected: ${file.name} (${formatFileSize(file.size)})`;
+            document.getElementById('selectedFile').classList.add('show');
+            
+            // Clear previous translation results
+            document.getElementById('machineTranslation').textContent = 'No content yet';
+            document.getElementById('literaryRefinement').textContent = 'No content yet';
+            
+            // Hide export buttons and progress section
+            document.getElementById('exportButtons').style.display = 'none';
+            
+            const progressSection = document.getElementById('progressSection');
+            if (progressSection) {
+                progressSection.style.display = 'none';
+            }
+            
+            // Reset progress bar
+            const progressBar = document.getElementById('progressBar');
+            if (progressBar) {
+                progressBar.style.width = '0%';
+            }
+            
+            // Read and display file content
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const content = e.target.result;
+                document.getElementById('originalText').textContent = content;
+                console.log('File loaded, length:', content.length);
+            };
+            reader.onerror = function(e) {
+                console.error('Error reading file:', e);
+                document.getElementById('originalText').textContent = 'Error reading file';
+            };
+            reader.readAsText(file);
+        }
+
+        function formatFileSize(bytes) {
+            if (bytes < 1024) return bytes + ' B';
+            if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+            return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+
+        async function loadModels() {
+            const modelSelect = document.getElementById('model');
+            try {
+                console.log('Fetching models from:', `${API_URL}/models`);
+                const response = await fetch(`${API_URL}/models?t=${Date.now()}`, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'application/json',
+                    },
+                    cache: 'no-cache'
+                });
+                
+                console.log('Response status:', response.status);
+                
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                
+                const data = await response.json();
+                console.log('Received data:', data);
+                
+                if (!data.models || data.models.length === 0) {
+                    throw new Error('No models available');
+                }
+                
+                modelSelect.innerHTML = data.models.map(model => 
+                    `<option value="${model.name}">${model.name}</option>`
+                ).join('');
+
+                const statValue = document.getElementById('availableModels');
+                if (statValue) {
+                    statValue.textContent = data.models.length;
+                }
+                
+                console.log(`✓ Loaded ${data.models.length} models successfully`);
+            } catch (error) {
+                console.error('✗ Error loading models:', error);
+                if (modelSelect) {
+                    modelSelect.innerHTML = `<option value="">❌ ${error.message}</option>`;
+                }
+                const statValue = document.getElementById('availableModels');
+                if (statValue) {
+                    statValue.textContent = '0';
+                }
+            }
+        }
+
+        async function loadStats() {
+            try {
+                const metricsResponse = await fetch(`${API_URL}/metrics`);
+                const data = await metricsResponse.json();
+                
+                const tm = data.translation_metrics;
+                const sm = data.system_metrics;
+                
+                // Update stats
+                const successRate = tm.success_rate || 100.0;
+                document.getElementById('successRate').textContent = successRate.toFixed(1) + '%';
+                document.getElementById('avgTime').textContent = (tm.average_translation_time || 0).toFixed(1) + 's';
+                document.getElementById('cpuUsage').textContent = (sm.cpu_percent || 0).toFixed(1) + '%';
+                document.getElementById('memoryUsage').textContent = (sm.memory_percent || 0).toFixed(1) + '%';
+            } catch (error) {
+                console.error('Error loading stats:', error);
+            }
+        }
+
+        function switchTab(tab) {
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(t => t.classList.remove('active'));
+            tabContents.forEach(tc => tc.classList.remove('active'));
+            
+            if (tab === 'new') {
+                tabs[0].classList.add('active');
+                document.getElementById('newTranslationTab').classList.add('active');
+            } else {
+                tabs[1].classList.add('active');
+                document.getElementById('historyTab').classList.add('active');
+                loadTranslations();
+            }
+        }
+
+        async function loadTranslations() {
+            try {
+                const response = await fetch(`${API_URL}/translations`);
+                const data = await response.json();
+                
+                const historyList = document.getElementById('historyList');
+                
+                if (data.translations.length === 0) {
+                    historyList.innerHTML = '<p style="text-align: center; color: #999;">No translations yet</p>';
+                    return;
+                }
+
+                historyList.innerHTML = data.translations.slice(0, 10).map(t => `
+                    <div class="history-item">
+                        <div class="history-item-info">
+                            <div class="history-item-title">
+                                <span class="status-badge status-${t.status}">${t.status}</span>
+                                ${t.filename || 'Unknown'}
+                            </div>
+                            <div class="history-item-meta">
+                                ${t.source_lang} → ${t.target_lang} | ${new Date(t.created_at).toLocaleString()}
+                                ${t.progress ? ` | ${t.progress.toFixed(0)}%` : ''}
+                            </div>
+                        </div>
+                        ${t.status === 'completed' ? 
+                            `<button class="btn btn-small" onclick="downloadTranslation(${t.id})">⬇ Download</button>` : 
+                            t.status === 'error' ? 
+                            `<button class="btn btn-small" onclick="retryTranslation(${t.id})">🔄 Retry</button>` : 
+                            ''
+                        }
+                    </div>
+                `).join('');
+            } catch (error) {
+                console.error('Error loading translations:', error);
+            }
+        }
+
+        async function handleSubmit(e) {
+            e.preventDefault();
+
+            // Get text from textarea or file
+            const textArea = document.getElementById('textInput');
+            const textContent = textArea ? textArea.value.trim() : '';
+            
+            let fileToUpload = selectedFile;
+            
+            // If no file selected but text is entered, create a file from text
+            if (!fileToUpload && textContent) {
+                const blob = new Blob([textContent], { type: 'text/plain' });
+                fileToUpload = new File([blob], 'pasted_text.txt', { type: 'text/plain' });
+            }
+            
+            if (!fileToUpload && !textContent) {
+                alert('Please select a file or enter text');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', fileToUpload);
+            formData.append('sourceLanguage', document.getElementById('sourceLanguage').value);
+            formData.append('targetLanguage', document.getElementById('targetLanguage').value);
+            formData.append('model', document.getElementById('model').value);
+            formData.append('genre', document.getElementById('genre').value);
+
+            const translateBtn = document.getElementById('translateBtn');
+            const progressSection = document.getElementById('progressSection');
+            
+            translateBtn.disabled = true;
+            progressSection.style.display = 'block';
+
+            try {
+                const response = await fetch(`${API_URL}/translate`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Translation failed');
+                }
+
+                // Parse stream to get translation ID and results
+                const reader = response.body.getReader();
+                const decoder = new TextDecoder();
+                let buffer = '';
+                let lastData = null;
+                
+                // Show indeterminate progress
+                document.getElementById('progressBar').style.width = '50%';
+                document.getElementById('progressInfo').textContent = 'Translating...';
+
+                while (true) {
+                    const { done, value } = await reader.read();
+                    if (done) break;
+                    
+                    buffer += decoder.decode(value, { stream: true });
+                    const lines = buffer.split('\n');
+                    buffer = lines.pop() || '';
+
+                    for (const line of lines) {
+                        if (line.startsWith('data: ')) {
+                            try {
+                                const data = JSON.parse(line.substring(6).trim());
+                                lastData = data;
+                                
+                                // Update UI with actual data
+                                if (data.progress) {
+                                    document.getElementById('progressBar').style.width = data.progress + '%';
+                                    document.getElementById('progressInfo').textContent = 
+                                        `${data.stage || 'Processing'} - ${Math.round(data.progress)}%`;
+                                }
+                                
+                                if (data.original_text) {
+                                    document.getElementById('originalText').textContent = data.original_text;
+                                }
+                                if (data.machine_translation) {
+                                    document.getElementById('machineTranslation').textContent = data.machine_translation;
+                                }
+                                if (data.translated_text) {
+                                    document.getElementById('literaryRefinement').textContent = data.translated_text;
+                                }
+                            } catch (e) {
+                                // Ignore JSON errors, continue
+                            }
+                        }
+                    }
+                }
+                
+                // Translation complete
+                document.getElementById('progressBar').style.width = '100%';
+                document.getElementById('progressInfo').textContent = 'Completed!';
+
+                alert('Translation completed successfully!');
+                document.getElementById('exportButtons').style.display = 'flex';
+                loadTranslations();
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Translation failed: ' + error.message);
+            } finally {
+                translateBtn.disabled = false;
+                progressSection.style.display = 'none';
+            }
+        }
+
+        function updateProgress(data) {
+            const progressBar = document.getElementById('progressBar');
+            const progressInfo = document.getElementById('progressInfo');
+
+            progressBar.style.width = data.progress + '%';
+            
+            progressInfo.textContent = `${data.stage} - Chunk ${data.current_chunk}/${data.total_chunks}`;
+            
+            // Update text panels
+            if (data.original_text) {
+                document.getElementById('originalText').textContent = data.original_text;
+            }
+            if (data.machine_translation) {
+                document.getElementById('machineTranslation').textContent = data.machine_translation;
+            }
+            if (data.translated_text) {
+                document.getElementById('literaryRefinement').textContent = data.translated_text;
+            }
+        }
+
+        function resetForm() {
+            document.getElementById('translationForm').reset();
+            document.getElementById('selectedFile').classList.remove('show');
+            selectedFile = null;
+        }
+
+        async function downloadTranslation(id) {
+            window.location.href = `${API_URL}/download/${id}`;
+        }
+
+        async function retryTranslation(id) {
+            if (!confirm('Retry this translation?')) return;
+
+            try {
+                const response = await fetch(`${API_URL}/retry-translation/${id}`, {
+                    method: 'POST'
+                });
+
+                if (response.ok) {
+                    alert('Translation retry initiated');
+                    loadTranslations();
+                } else {
+                    alert('Failed to retry translation');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error retrying translation');
+            }
+        }
+
+        // Export functions
+        function copyToClipboard() {
+            const text = document.getElementById('literaryRefinement').textContent;
+            if (text === 'No content yet') {
+                alert('No translation to copy');
+                return;
+            }
+            
+            navigator.clipboard.writeText(text).then(() => {
+                alert('✓ Copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy:', err);
+                alert('Failed to copy to clipboard');
+            });
+        }
+
+        function saveAsTxt() {
+            const text = document.getElementById('literaryRefinement').textContent;
+            if (text === 'No content yet') {
+                alert('No translation to save');
+                return;
+            }
+            
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `translation_${Date.now()}.txt`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        function saveAsPdf() {
+            const text = document.getElementById('literaryRefinement').textContent;
+            if (text === 'No content yet') {
+                alert('No translation to save');
+                return;
+            }
+            
+            // Split by double newlines to get paragraphs
+            const paragraphs = text.split('\n\n').filter(p => p.trim());
+            const htmlParagraphs = paragraphs.map(p => {
+                // Replace single newlines with <br> within paragraphs
+                const formatted = p.trim().replace(/\n/g, '<br>');
+                return `<p>${formatted}</p>`;
+            }).join('\n');
+            
+            // Create a simple HTML for PDF
+            const htmlContent = `<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        body { 
+            font-family: Georgia, serif; 
+            line-height: 1.8; 
+            padding: 40px; 
+            max-width: 800px; 
+            margin: 0 auto; 
+            color: #333;
+        }
+        h1 { 
+            font-size: 24px; 
+            margin-bottom: 30px; 
+            color: #000;
+        }
+        p { 
+            margin-bottom: 1.5em; 
+            text-align: justify;
+            text-indent: 2em;
+        }
+        p:first-of-type {
+            text-indent: 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Translation Result</h1>
+    ${htmlParagraphs}
+</body>
+</html>`;
+            
+            const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `translation_${Date.now()}.html`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            alert('HTML file saved. Open it in a browser and use Print > Save as PDF');
+        }
+
+        async function saveAsEpub() {
+            const text = document.getElementById('literaryRefinement').textContent;
+            if (text === 'No content yet') {
+                alert('No translation to save');
+                return;
+            }
+            
+            // Prompt for title
+            const title = prompt('Enter book title:', 'Translated Book') || 'Translated Book';
+            const author = prompt('Enter author name:', 'Unknown Author') || 'Unknown Author';
+            
+            try {
+                const response = await fetch(`${API_URL}/export/epub`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        text: text,
+                        title: title,
+                        author: author
+                    })
+                });
+                
+                if (!response.ok) {
+                    throw new Error('Failed to create EPUB');
+                }
+                
+                // Download the EPUB file
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `${title.replace(/[^a-z0-9]/gi, '_')}.epub`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                
+                alert('✓ EPUB file created successfully!');
+            } catch (error) {
+                console.error('EPUB export error:', error);
+                alert('Failed to create EPUB: ' + error.message);
+            }
+        }
+
+        // Auto-refresh stats and translations
+        setInterval(() => {
+            loadStats();
+            loadTranslations();
+        }, 5000);
     </script>
 </body>
-</html>
+</html> 

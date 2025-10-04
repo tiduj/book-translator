@@ -1,144 +1,180 @@
-![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/banner.jpg)
+# 📚 Book Translator
 
-[![Python 3.7+](https://img.shields.io/badge/python-3.7+-blue.svg)](https://www.python.org/downloads/)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Flask](https://img.shields.io/badge/flask-%23000.svg?style=flat&logo=flask&logoColor=white)](https://flask.palletsprojects.com/)
-[![React](https://img.shields.io/badge/react-%2320232a.svg?style=flat&logo=react&logoColor=%2361DAFB)](https://reactjs.org/)
-[![Tailwind CSS](https://img.shields.io/badge/tailwindcss-%2338B2AC.svg?style=flat&logo=tailwind-css&logoColor=white)](https://tailwindcss.com/)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg)](http://makeapullrequest.com)
+AI-powered translation system that actually understands context. Built for books, documents, and anything that needs more than word-by-word translation.
 
-A web-based application for translating books and large text documents between multiple languages using Ollama AI models. Built with Python (Flask) backend and React frontend.
+## 🎯 How It Works
 
-## Features
-
-### Core Features
-- Translate text documents between multiple languages:
-  - English
-  - Russian
-  - German
-  - French
-  - Spanish
-  - Italian
-  - Chinese
-  - Japanese
-- Automatic language detection
-- Support for multiple Ollama AI models
-- Real-time translation progress tracking
-- Translation history with status tracking
-- Resume interrupted translations
-- Download translated files
-- Modern, responsive UI built with React and Tailwind CSS
-
-### Advanced Features
-- Translation caching system
-- Automatic error recovery
-- Rate limiting and retry logic
-- Chunked translation processing
-- Real-time metrics monitoring
-- Health check system
-- Comprehensive logging system
-- Automatic cleanup of old translations
-
-## Prerequisites
-- Python 3.7+
-- [Ollama](https://ollama.ai/) installed and running
-- Node.js (optional, for development)
-
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/yourusername/book-translator.git
-cd book-translator
+```
+Original Text
+     ↓
+┌─────────────────────────────────────┐
+│  Stage 1: Primary Translation       │
+│  • Full context awareness           │
+│  • Genre-specific adaptation        │
+│  • Idiom localization              │
+└─────────────────────────────────────┘
+     ↓
+┌─────────────────────────────────────┐
+│  Stage 2: Self-Reflection          │
+│  • AI critiques its own work       │
+│  • Checks accuracy & naturalness   │
+│  • Polishes final output           │
+└─────────────────────────────────────┘
+     ↓
+Final Translation
 ```
 
-2. Install Python dependencies:
+**No Google Translate. No DeepL. Pure LLM pipeline.**
+
+## ⚡ Quick Start
+
 ```bash
+# 1. Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# 2. Pull a model
+ollama pull llama3
+
+# 3. Clone & run
+git clone <repo-url>
+cd BTrans
 pip install -r requirements.txt
-```
-
-3. Make sure Ollama is running and you have at least one model pulled:
-```bash
-ollama pull aya-expanse:32b
-```
-
-## Running the Application
-
-1. Start the Flask backend:
-```bash
 python translator.py
 ```
 
-2. Access the application:
-Open `http://localhost:5001` in your web browser
+Open **http://localhost:5001** → paste text → translate
 
-## Project Structure
+## 🎨 Features
+
+| Feature | Description |
+|---------|-------------|
+| **Smart Chunking** | Splits by paragraphs, not arbitrary limits |
+| **Context Memory** | Each chunk knows what came before |
+| **Genre Modes** | Fiction, technical, academic, business, poetry |
+| **Two-Stage Quality** | Draft → Reflection → Final |
+| **Multi-Format Export** | TXT, PDF, EPUB, clipboard |
+| **Translation History** | Auto-saved, searchable, re-exportable |
+| **Progress Tracking** | Real-time updates, 3-panel view |
+
+## 🔧 Supported Languages
+
+English • Russian • Spanish • French • German • Italian • Portuguese • Chinese • Japanese • Korean
+
+## 💡 Example
+
+**Input (English):**
 ```
-book-translator/
-├── translator.py        # Flask backend
-├── static/             # Static files
-│   └── index.html      # React frontend
-├── uploads/            # Temporary upload directory
-├── translations/       # Completed translations directory
-├── logs/              # Application logs directory
-│   ├── app.log        # Main application logs
-│   ├── translations.log # Translation-specific logs
-│   └── api.log        # API request logs
-├── translations.db     # Main SQLite database
-└── cache.db           # Translation cache database
+He kicked the bucket last night.
 ```
 
-## API Endpoints
+**Bad translation (literal):**
+```
+Он пнул ведро прошлой ночью.
+```
 
-### Translation Operations
-- `POST /translate` - Start new translation
-- `GET /translations` - Get translation history
-- `GET /translations/<id>` - Get specific translation details
-- `GET /download/<id>` - Download completed translation
-- `POST /retry-translation/<id>` - Retry failed translation
+**Our translation (Stage 1 + 2):**
+```
+Он умер прошлой ночью.
+```
 
-### System Operations
-- `GET /models` - Get available Ollama models
-- `GET /metrics` - Get system metrics and statistics
-- `GET /health` - Check service health
-- `GET /failed-translations` - Get list of failed translations
+Stage 1 understands idiom. Stage 2 ensures naturalness.
 
-## Monitoring and Metrics
+## 🎛️ Configuration
 
-The application provides real-time monitoring of:
-- Translation success rate
-- Average translation time
-- CPU usage
-- Memory usage
-- Disk usage
-- System uptime
-- Translation queue status
+Edit `translator.py` or use defaults:
 
-## Error Handling and Recovery
+```python
+PORT = 5001
+CHUNK_SIZE = 1000  # characters
+OLLAMA_URL = "http://localhost:11434"
 
-- Automatic retry system for failed translations
-- Configurable retry attempts and backoff
-- Detailed error logging and tracking
-- Translation state preservation
-- Automatic cleanup of failed translations after 7 days
+# Temperature by genre
+TEMPERATURES = {
+    'fiction': 0.7,    # more creative
+    'technical': 0.3,  # more precise
+    'poetry': 0.8      # most creative
+}
+```
 
-## Caching System
+## 📁 Project Structure
 
-- Translation results are cached for improved performance
-- Configurable cache retention period (default 30 days)
-- Automatic cache cleanup
-- Cache hit/miss tracking
+```
+BTrans/
+├── translator.py          # Backend (Flask + Ollama)
+├── static/index.html      # Frontend (vanilla JS)
+├── requirements.txt       # 4 dependencies
+├── logs/                  # Rotation logs
+├── translations/          # Exported files
+└── cache.db              # SQLite cache
+```
 
-## Contributing
+## 🐛 Troubleshooting
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+**"Connection refused"**
+```bash
+ollama serve  # start Ollama
+```
 
-## License
+**"Model not found"**
+```bash
+ollama list           # check installed
+ollama pull llama3    # install model
+```
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+**Slow performance**
+- Use smaller models: `llama3:8b` instead of `llama3:70b`
+- Reduce chunk size: 500 chars instead of 1000
+- Check CPU/RAM usage in UI
 
-![Book Translator](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
+**Clear cache**
+```bash
+rm cache.db translations.db
+```
+
+## 🚀 Advanced Usage
+
+**Custom model:**
+```bash
+ollama pull mistral
+# Select "mistral" in UI dropdown
+```
+
+**Batch processing:**
+```python
+# API endpoint
+POST /api/translate
+{
+  "text": "...",
+  "source_lang": "en",
+  "target_lang": "ru",
+  "genre": "fiction",
+  "model": "llama3"
+}
+```
+
+**Export formats:**
+- TXT: plain text
+- PDF: formatted with metadata
+- EPUB: e-reader compatible
+- Clipboard: instant copy
+
+## 📊 Performance
+
+| Model | Speed | Quality | RAM |
+|-------|-------|---------|-----|
+| llama3:8b | Fast | Good | 8GB |
+| llama3:70b | Slow | Excellent | 64GB |
+| mistral:7b | Fast | Good | 8GB |
+| gemma:7b | Fast | Good | 8GB |
+
+## 🤝 Contributing
+
+Found a bug? Have an idea? PRs welcome.
+
+## 📄 License
+
+MIT - do whatever you want
+
+---
+
+**Why this exists:** Machine translation is fast but dumb. This is slower but actually understands what it's translating.

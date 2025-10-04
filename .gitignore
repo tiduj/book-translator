@@ -27,19 +27,27 @@ ENV/
 .env
 
 # Project specific
-uploads/
-translations/
+uploads/*
+!uploads/.gitkeep
+translations/*
+!translations/.gitkeep
 translations.db
+cache.db
 *.db
 *.sqlite3
 
 # IDE
 .idea/
 .vscode/
+.qodo/
 *.swp
 *.swo
 .DS_Store
 
 # Logs
 *.log
-logs/
+logs/*
+!logs/.gitkeep
+
+# Temporary files
+nltk_data/
