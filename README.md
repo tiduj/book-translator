@@ -177,4 +177,6 @@ MIT - do whatever you want
 
 ---
 
+> **Note:** The previous version of this project is available in the `archive-old-version` branch.
+
 **Why this exists:** Machine translation is fast but dumb. This is slower but actually understands what it's translating.
