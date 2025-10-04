@@ -1,182 +1,100 @@
-# 📚 Book Translator
+<div align="center">
+  <img src="https://github.com/user-attachments/assets/f62278a1-ec33-4096-aa13-a855dd7bda4f" alt="Logo">
+  <br> 
+</div>
+<div align="center">
+<p><strong>Book Translator</strong></p>
+  <p>A platform for translating books and large text documents.</p>
+  <p><strong>Two-step process. For better quality.</strong></p>
+</div>
+  <p>The tool processes text files using Ollama LLM models with a two-stage approach: primary translation followed by AI self-reflection and refinement for better results. Suitable for translators, publishers, authors, researchers and content creators who need to translate large text documents.</p>
+Support for multiple languages including English, Russian, Spanish, French, German, Italian, Portuguese, Chinese, Japanese, and Korean. Genre-specific modes (fiction, technical, academic, business, poetry), real-time translation progress tracking for both stages, translation history and status monitoring, automatic error recovery and retry mechanisms, and multi-format export (TXT, PDF, EPUB).  <br>   <br> 
+![Book Translator Demo](https://raw.githubusercontent.com/KazKozDev/book-translator/main/demo.jpg)
 
-AI-powered translation system that actually understands context. Built for books, documents, and anything that needs more than word-by-word translation.
+## Requirements
 
-## 🎯 How It Works
+- Python 3.7+
+- [Ollama](https://ollama.ai/) installed and running
+- Recommended: 8GB+ RAM for basic models, 64GB for large models
 
-```
-Original Text
-     ↓
-┌─────────────────────────────────────┐
-│  Stage 1: Primary Translation       │
-│  • Full context awareness           │
-│  • Genre-specific adaptation        │
-│  • Idiom localization              │
-└─────────────────────────────────────┘
-     ↓
-┌─────────────────────────────────────┐
-│  Stage 2: Self-Reflection          │
-│  • AI critiques its own work       │
-│  • Checks accuracy & naturalness   │
-│  • Polishes final output           │
-└─────────────────────────────────────┘
-     ↓
-Final Translation
-```
+## Installation
 
-**No Google Translate. No DeepL. Pure LLM pipeline.**
-
-## ⚡ Quick Start
-
+1. **Install Ollama**
 ```bash
-# 1. Install Ollama
 curl -fsSL https://ollama.com/install.sh | sh
+```
 
-# 2. Pull a model
-ollama pull llama3
+2. **Clone the repository**
+```bash
+git clone https://github.com/KazKozDev/book-translator.git
+cd book-translator
+```
 
-# 3. Clone & run
-git clone <repo-url>
-cd BTrans
+3. **Install dependencies**
+```bash
 pip install -r requirements.txt
+```
+
+4. **Pull an Ollama model (choose any you prefer)**
+```bash
+# Example with gpt-oss:20b
+ollama pull gpt-oss:20b
+
+# Or use other models:
+# ollama pull llama3.2
+# ollama pull qwen2.5
+# ollama pull gemma3:12b
+# ollama pull phi3
+```
+
+5. **Start the application**
+
+**Option 1: Quick Launch (macOS)**
+```bash
+./Launch\ Book-Translator.command
+```
+This will automatically:
+- Kill any process on port 5001
+- Start the Flask server
+- Open http://localhost:5001 in your browser
+- Clear translation cache
+
+**Option 2: Manual start**
+```bash
 python translator.py
+# Then open http://localhost:5001 in your browser
 ```
 
-Open **http://localhost:5001** → paste text → translate
-
-## 🎨 Features
-
-| Feature | Description |
-|---------|-------------|
-| **Smart Chunking** | Splits by paragraphs, not arbitrary limits |
-| **Context Memory** | Each chunk knows what came before |
-| **Genre Modes** | Fiction, technical, academic, business, poetry |
-| **Two-Stage Quality** | Draft → Reflection → Final |
-| **Multi-Format Export** | TXT, PDF, EPUB, clipboard |
-| **Translation History** | Auto-saved, searchable, re-exportable |
-| **Progress Tracking** | Real-time updates, 3-panel view |
-
-## 🔧 Supported Languages
-
-English • Russian • Spanish • French • German • Italian • Portuguese • Chinese • Japanese • Korean
-
-## 💡 Example
-
-**Input (English):**
-```
-He kicked the bucket last night.
-```
-
-**Bad translation (literal):**
-```
-Он пнул ведро прошлой ночью.
-```
-
-**Our translation (Stage 1 + 2):**
-```
-Он умер прошлой ночью.
-```
-
-Stage 1 understands idiom. Stage 2 ensures naturalness.
-
-## 🎛️ Configuration
-
-Edit `translator.py` or use defaults:
-
-```python
-PORT = 5001
-CHUNK_SIZE = 1000  # characters
-OLLAMA_URL = "http://localhost:11434"
-
-# Temperature by genre
-TEMPERATURES = {
-    'fiction': 0.7,    # more creative
-    'technical': 0.3,  # more precise
-    'poetry': 0.8      # most creative
-}
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
-BTrans/
-├── translator.py          # Backend (Flask + Ollama)
-├── static/index.html      # Frontend (vanilla JS)
-├── requirements.txt       # 4 dependencies
-├── logs/                  # Rotation logs
+book-translator/
+├── Launch Book-Translator.command  # Quick launch script (macOS)
+├── translator.py          # Flask backend
+├── static/index.html      # Frontend interface
+├── requirements.txt       # Python dependencies
+├── logs/                  # Application logs
 ├── translations/          # Exported files
-└── cache.db              # SQLite cache
+├── cache.db              # Translation cache
+└── translations.db        # Translation history
 ```
 
-## 🐛 Troubleshooting
+## Configuration
 
-**"Connection refused"**
-```bash
-ollama serve  # start Ollama
-```
+Default settings in `translator.py`:
+- Port: 5001
+- Chunk size: 1000 characters
+- Temperature varies by genre (0.3-0.8)
 
-**"Model not found"**
-```bash
-ollama list           # check installed
-ollama pull llama3    # install model
-```
+## License
 
-**Slow performance**
-- Use smaller models: `llama3:8b` instead of `llama3:70b`
-- Reduce chunk size: 500 chars instead of 1000
-- Check CPU/RAM usage in UI
-
-**Clear cache**
-```bash
-rm cache.db translations.db
-```
-
-## 🚀 Advanced Usage
-
-**Custom model:**
-```bash
-ollama pull mistral
-# Select "mistral" in UI dropdown
-```
-
-**Batch processing:**
-```python
-# API endpoint
-POST /api/translate
-{
-  "text": "...",
-  "source_lang": "en",
-  "target_lang": "ru",
-  "genre": "fiction",
-  "model": "llama3"
-}
-```
-
-**Export formats:**
-- TXT: plain text
-- PDF: formatted with metadata
-- EPUB: e-reader compatible
-- Clipboard: instant copy
-
-## 📊 Performance
-
-| Model | Speed | Quality | RAM |
-|-------|-------|---------|-----|
-| llama3:8b | Fast | Good | 8GB |
-| llama3:70b | Slow | Excellent | 64GB |
-| mistral:7b | Fast | Good | 8GB |
-| gemma:7b | Fast | Good | 8GB |
-
-## 🤝 Contributing
-
-Found a bug? Have an idea? PRs welcome.
-
-## 📄 License
-
-MIT - do whatever you want
+MIT License - see [LICENSE](LICENSE)
 
 ---
 
-> **Note:** The previous version of this project is available in the `archive-old-version` branch.
+If you like this project, please give it a star ⭐
 
-**Why this exists:** Machine translation is fast but dumb. This is slower but actually understands what it's translating.
+For questions, feedback, or support, open an issue or submit a PR.
+---
+
+> **Note:** The previous version of this project is available in the `archive-old-version` branch.
