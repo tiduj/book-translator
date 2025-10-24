@@ -12,12 +12,6 @@ Support for multiple languages including English, Russian, Spanish, French, Germ
 
 <img width="1191" height="889" alt="Screenshot 2025-10-04 at 12 54 17" src="https://github.com/user-attachments/assets/35838c1c-26be-4594-a759-dbaa76a9494f" />
 
-## Requirements
-
-- Python 3.7+
-- [Ollama](https://ollama.ai/) installed and running
-- Recommended: 8GB+ RAM for basic models, 64GB for large models
-
 ## Installation
 
 1. **Install Ollama**
@@ -64,20 +58,6 @@ This will automatically:
 ```bash
 python translator.py
 # Then open http://localhost:5001 in your browser
-```
-
-## Project Structure
-
-```
-book-translator/
-├── Launch Book-Translator.command  # Quick launch script (macOS)
-├── translator.py          # Flask backend
-├── static/index.html      # Frontend interface
-├── requirements.txt       # Python dependencies
-├── logs/                  # Application logs
-├── translations/          # Exported files
-├── cache.db              # Translation cache
-└── translations.db        # Translation history
 ```
 
 ## Configuration
