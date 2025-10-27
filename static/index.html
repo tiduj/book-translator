@@ -505,8 +505,8 @@
                     <div class="upload-section" id="uploadSection">
                         <div class="upload-icon">☁️</div>
                         <h3>Click to upload or drag and drop</h3>
-                        <p>TXT files only (max 10MB)</p>
-                        <input type="file" id="fileInput" class="file-input" accept=".txt" required>
+                        <p>TXT or EPUB files (max 10MB)</p>
+                        <input type="file" id="fileInput" class="file-input" accept=".txt,.epub" required>
                     </div>
 
                     <button type="submit" class="btn-translate" id="translateBtn">
@@ -648,7 +648,11 @@
                 console.error('Error reading file:', e);
                 document.getElementById('originalText').textContent = 'Error reading file';
             };
-            reader.readAsText(file);
+            if(file.name.toLowerCase().endsWith('.epub')) {
+                document.getElementById('originalText').textContent = 'EPUB file loaded. Text will be extracted on the server.';
+            } else {
+                reader.readAsText(file);
+            }            
         }
 
         function formatFileSize(bytes) {
