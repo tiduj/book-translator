@@ -13,3 +13,4 @@ black==23.12.1
 flake8==6.1.0
 
 EbookLib==0.18
+beautifulsoup4==4.12.3
