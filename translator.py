@@ -1,3 +1,5 @@
+from ebooklib import epub
+from bs4 import BeautifulSoup
 import json
 import requests
 import time
@@ -673,7 +675,15 @@ def get_translation(translation_id):
         if translation:
             return jsonify(dict(translation))
         return jsonify({'error': 'Translation not found'}), 404
-
+def extract_text_from_epub(epub_path):
+    book = epub.read_epub(epub_path)
+    text_content = []
+    for item in book.get_items():
+        if item.get_type() == epub.ITEM_DOCUMENT:
+            soup = BeautifulSoup(item.get_content(), 'html.parser')
+            paragraphs = [p.get_text() for p in soup.find_all('p')]
+            text_content.extend(paragraphs)
+    return '\n\n'.join(text_content)
 @app.route('/translate', methods=['POST'])
 @with_error_handling
 def translate():
@@ -692,12 +702,19 @@ def translate():
         filename = secure_filename(file.filename)
         filepath = os.path.join(UPLOAD_FOLDER, filename)
         file.save(filepath)
-        try:
-            with open(filepath, 'r', encoding='utf-8') as f:
-                text = f.read()
-        except UnicodeDecodeError:
-            with open(filepath, 'r', encoding='cp1251') as f:
-                text = f.read()
+        if filename.lower().endswith('.epub'):
+            try:
+                text = extract_text_from_epub(filepath)
+            except Exception as e:
+                logger.app_logger.error(f"Failed to extract EPUB: {str(e)}")
+                return jsonify({'error': f"Failed to read EPUB: {str(e)}"}), 400
+        else:
+            try:
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    text = f.read()
+            except UnicodeDecodeError:
+                with open(filepath, 'r', encoding='cp1251') as f:
+                    text = f.read()
         with sqlite3.connect(DB_PATH) as conn:
             cur = conn.execute('''
                 INSERT INTO translations (
