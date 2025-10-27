@@ -11,3 +11,5 @@ gunicorn==21.2.0
 pytest==7.4.3
 black==23.12.1
 flake8==6.1.0
+
+EbookLib==0.18
